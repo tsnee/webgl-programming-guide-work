@@ -1,0 +1,9 @@
+div.flex {
+  display: flex;
+}
+div {
+  margin: 3em;
+}
+p {
+  text-align: center;
+}
