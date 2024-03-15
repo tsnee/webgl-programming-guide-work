@@ -29,6 +29,8 @@ lazy val webgl = project.in(file("."))
     libraryDependencies ++= List(
     	"org.scala-js"   %%% "scalajs-dom" % "2.8.0",
 	"org.typelevel"  %%% "cats-effect" % "3.5.4",
-	"com.armanbilge" %%% "calico"      % "0.2.2"
-    )
+	"com.armanbilge" %%% "calico"      % "0.2.2",
+	"com.armanbilge" %%% "fs2-dom"     % "0.3-3db91e2-SNAPSHOT"
+    ),
+    libraryDependencySchemes += "com.armanbilge" %% "fs2-dom_sjs1" % VersionScheme.Always
   )
