@@ -1,8 +1,8 @@
-div.flex {
-  display: flex;
-}
 div {
   margin: 3em;
+}
+div.flex {
+  display: flex;
 }
 p {
   text-align: center;
