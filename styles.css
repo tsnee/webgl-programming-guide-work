@@ -2,7 +2,10 @@ div.flex {
   display: flex;
 }
 div {
-  margin: 3em;
+  margin: 2em;
+}
+fieldset {
+  margin: 2em;
 }
 p {
   text-align: center;

@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter2
+package io.github.tsnee.webgl
 
 import io.github.tsnee.webgl.ProgramCreator.createProgram
 import io.github.tsnee.webgl.ShaderCreator.createShader
