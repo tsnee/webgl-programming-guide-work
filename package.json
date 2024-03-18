@@ -9,9 +9,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.1.0"
+    "vite": "^4.1.0",
+    "@scala-js/vite-plugin-scalajs": "^1.0.0"
   },
   "dependencies": {
-    "@scala-js/vite-plugin-scalajs": "^1.0.0"
+    "snabbdom": "https://codeload.github.com/outwatch/snabbdom/tar.gz/f92761a40914825d7b8f702f607f9d929f95033f"
   }
 }

@@ -1,7 +1,8 @@
 package io.github.tsnee.webgl.chapter2
 
 import org.scalajs.dom
-import org.scalajs.dom.{WebGLProgram, WebGLRenderingContext}
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
 object HelloPoint2 extends SimpleWebglProgram:
   override def vertexShaderSource: String = """

@@ -1,10 +1,12 @@
 import org.scalajs.linker.interface.ModuleSplitStyle
 
 lazy val webgl = project.in(file("."))
-  .enablePlugins(ScalaJSPlugin) // Enable the Scala.js plugin in this project
+  .enablePlugins(ScalaJSPlugin)
   .settings(
     scalaVersion := "3.4.0",
-    scalacOptions ++= List("-deprecation", "-explain"),
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalacOptions ++= List("-explain"),
 
     // Tell Scala.js that this is an application with a main method
     scalaJSUseMainModuleInitializer := true,
@@ -27,8 +29,8 @@ lazy val webgl = project.in(file("."))
      * It provides static types for the browser DOM APIs.
      */
     libraryDependencies ++= List(
-    	"org.scala-js"   %%% "scalajs-dom" % "2.8.0",
-	"org.typelevel"  %%% "cats-effect" % "3.5.4",
-	"com.armanbilge" %%% "calico"      % "0.2.2"
+    	"org.scala-js"       %%% "scalajs-dom" % "2.8.0",
+	"org.typelevel"      %%% "cats-effect" % "3.5.4",
+	"io.github.outwatch" %%% "outwatch"    % "1.0.0"
     )
   )
