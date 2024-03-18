@@ -1,13 +1,17 @@
 package io.github.tsnee.webgl.chapter2
 
 import org.scalajs.dom
-import org.scalajs.dom.{MouseEvent, WebGLProgram, WebGLRenderingContext, WebGLUniformLocation}
+import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
+import org.scalajs.dom.WebGLUniformLocation
 import org.scalajs.dom.html.Canvas
+
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object ColoredPoints extends SimpleWebglProgram:
-  override def vertexShaderSource: String = """
+object ColoredPoints:
+  val vertexShaderSource: String = """
 attribute vec4 a_Position;
 void main() {
   gl_Position = a_Position;
@@ -15,7 +19,7 @@ void main() {
 }
 """
 
-  override def fragmentShaderSource: String = """
+  val fragmentShaderSource: String = """
 precision mediump float;
 uniform vec4 u_FragColor;
 void main() {
@@ -23,31 +27,52 @@ void main() {
 }
 """
 
-  override def canvasId: String = "colored-points"
+  def initialize(canvas: Canvas): Unit =
+    WebglInitializer.initialize(
+      canvas,
+      vertexShaderSource,
+      fragmentShaderSource,
+      run(canvas, _, _)
+    )
 
-  def click(
-    ev: MouseEvent,
-    gl: WebGLRenderingContext,
-    canvas: Canvas,
-    aPosition: Int,
-    uFragColor: WebGLUniformLocation
+  private def click(
+      ev: MouseEvent,
+      canvas: Canvas,
+      gl: WebGLRenderingContext,
+      aPosition: Int,
+      uFragColor: WebGLUniformLocation,
+      points: js.Array[Float],
+      colors: js.Array[Float]
   ): Unit =
-    val rect = canvas.getBoundingClientRect()
-    val x = ((ev.clientX - rect.left) - canvas.width / 2) / (canvas.width / 2)
-    val y = (canvas.height / 2 - (ev.clientY - rect.top)) / (canvas.height / 2)
-    gl.vertexAttrib3fv(aPosition, Float32Array(js.Array(x.toFloat, y.toFloat, 0f)))
-    val color = if (x >= 0.0 && y >= 0.0) then js.Array(1f, 0f, 0f, 1f)
-      else if (x < 0.0 && y < 0.0) then js.Array(0f, 1f, 0f, 1f)
-      else js.Array(1f, 1f, 1f, 1f)
-    gl.uniform4fv(uFragColor, Float32Array(color))
+    val rect  = canvas.getBoundingClientRect()
+    val x     = ((ev.clientX - rect.left) - canvas.width / 2) / (canvas.width / 2)
+    val y     = (canvas.height / 2 - (ev.clientY - rect.top)) / (canvas.height / 2)
+    points.addAll(js.Array(x.toFloat, y.toFloat, 0f))
+    val color = if x >= 0.0 && y >= 0.0 then js.Array(1f, 0f, 0f)
+    else if x < 0.0 && y < 0.0 then js.Array(0f, 1f, 0f)
+    else js.Array(1f, 1f, 1f)
+    colors.addAll(color)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
-    gl.drawArrays(WebGLRenderingContext.POINTS, 0, 1)
+    points.zip(colors).sliding(3, 3).foreach: window =>
+      val (point, color) = window.unzip
+      gl.uniform4fv(uFragColor, Float32Array(color :+ 1f))
+      gl.vertexAttrib3fv(aPosition, Float32Array(point))
+      gl.drawArrays(WebGLRenderingContext.POINTS, 0, 1)
 
-  override def run(gl: WebGLRenderingContext, program: WebGLProgram): Unit =
-    val aPosition = gl.getAttribLocation(program, "a_Position")
+  private def run(
+      canvas: Canvas,
+      gl: WebGLRenderingContext,
+      program: WebGLProgram
+  ): Unit =
+    val aPosition  = gl.getAttribLocation(program, "a_Position")
     val uFragColor = gl.getUniformLocation(program, "u_FragColor")
-    lookupCanvasElement(canvasId).foreach(canvas => canvas.addEventListener("click", click(_, gl, canvas, aPosition, uFragColor)))
     gl.vertexAttrib3f(aPosition, 0f, 0f, 0f)
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
+    val points     = js.Array[Float]()
+    val colors     = js.Array[Float]()
+    canvas.addEventListener(
+      "click",
+      click(_, canvas, gl, aPosition, uFragColor, points, colors)
+    )
