@@ -20,5 +20,10 @@ object Summary:
       "RotatingTriangle",
       RotatingTriangle.initialize,
       URI("https://rodger.global-linguist.com/webgl/ch04/RotatingTriangle.html")
+    ),
+    Example(
+      "RotatingTranslatedTriangle",
+      RotatingTranslatedTriangle.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch04/RotatingTranslatedTriangle.html")
     )
   )

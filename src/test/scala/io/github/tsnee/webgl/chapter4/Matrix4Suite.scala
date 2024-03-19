@@ -29,8 +29,20 @@ class Matrix4Suite extends FunSuite:
     val expected = Matrix4.Identity
     assertEq(actual, expected)
 
+  test("left multiplication works"):
+    val a        = Matrix4(1f, 3f, 0f, 0f, 2f, 4f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    val b        = Matrix4(5f, 7f, 0f, 0f, 6f, 8f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    val expected = Matrix4(19f, 43f, 0f, 0f, 22f, 50f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    assertEq(a * b, expected)
+
+  test("right multiplication works"):
+    val a        = Matrix4(1f, 3f, 0f, 0f, 2f, 4f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    val b        = Matrix4(5f, 7f, 0f, 0f, 6f, 8f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    val expected = Matrix4(23f, 31f, 0f, 0f, 34f, 46f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    assertEq(b * a, expected)
+
   test("translation followed by rotation"):
-    val actual   =
-      Vec4(0f, 0f, 0f, 1f).translate(0.5f, 0f, 0f).rotate(60f, 0f, 0f, 1f)
+    val model    = Matrix4.setRotate(60f, 0f, 0f, 1f).translate(0.5f, 0f, 0f)
+    val actual   = model * Vec4(0f, 0f, 0f, 1f)
     val expected = Vec4(0.25f, (Math.sqrt(3) / 4).toFloat, 0f, 1f)
     assertEq(actual, expected)

@@ -7,7 +7,7 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object RotatingTriangle:
+object RotatingTranslatedTriangle:
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
@@ -86,7 +86,7 @@ void main() {
     gl.uniformMatrix4fv(
       location = uModelMatrix,
       transpose = false,
-      value = Matrix4.setRotate(currentAngle, 0f, 0f, 1f).toFloat32Array
+      value = Matrix4.setRotate(currentAngle, 0f, 0f, 1f).translate(0.35f, 0f, 0f).toFloat32Array
     )
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.drawArrays(

@@ -37,13 +37,13 @@ final case class Matrix4(private val backingStore: Float32Array)
   )))
 
   def rotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
-    Matrix4.setRotate(degrees, x, y, z) * lhs
+    lhs * Matrix4.setRotate(degrees, x, y, z)
 
   def scale(x: Float, y: Float, z: Float): Matrix4 =
-    Matrix4.setScale(x, y, z) * lhs
+    lhs * Matrix4.setScale(x, y, z)
 
   def translate(x: Float, y: Float, z: Float): Matrix4 =
-    Matrix4.setTranslate(x, y, z) * lhs
+    lhs * Matrix4.setTranslate(x, y, z)
 
 object Matrix4:
   given eqMatrix4(using f: Eq[BackedByFloat32Array]): Eq[Matrix4] = Eq.instance:
@@ -100,7 +100,7 @@ object Matrix4:
     val xNorm   = x / w
     val yNorm   = y / w
     val zNorm   = z / w
-    val radians = Math.PI * degrees / 180
+    val radians = Math.PI * degrees / 180.0
     val cosB    = Math.cos(radians)
     val sinB    = Math.sin(radians)
     Matrix4(Float32Array(js.Array(
@@ -114,7 +114,7 @@ object Matrix4:
       0f,
       (xNorm * zNorm * (1 - cosB) + yNorm * sinB).toFloat,
       (yNorm * zNorm * (1 - cosB) - xNorm * sinB).toFloat,
-      (cosB + xNorm * xNorm * (1 - cosB)).toFloat,
+      (cosB + zNorm * zNorm * (1 - cosB)).toFloat,
       0f,
       0f,
       0f,
