@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter3
+package io.github.tsnee.webgl.chapter4
 
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
@@ -7,13 +7,13 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object ScaledTriangleMatrix:
+object RotatingTriangle:
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
-uniform mat4 u_xformMatrix;
+uniform mat4 u_modelMatrix;
 void main() {
-  gl_Position = u_xformMatrix * a_Position;
+  gl_Position = u_modelMatrix * a_Position;
 }
 """
 
@@ -55,37 +55,43 @@ void main() {
     )
     gl.enableVertexAttribArray(aPosition)
     gl.clearColor(0f, 0f, 0f, 1f)
-    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
-    val uXformMatrix = gl.getUniformLocation(program, "u_xformMatrix")
-    val sx           = 1f
-    val sy           = 1.5f
-    val sz           = 1f
-    val xformMatrix  = Float32Array(js.Array(
-      sx,
-      0f,
-      0f,
-      0f,
-      0f,
-      sy,
-      0f,
-      0f,
-      0f,
-      0f,
-      sz,
-      0f,
-      0f,
-      0f,
-      0f,
-      1f
-    ))
-    gl.uniformMatrix4fv(
-      location = uXformMatrix,
-      transpose = false,
-      value = xformMatrix
+    val uModelMatrix = gl.getUniformLocation(program, "u_modelMatrix")
+    val now          = js.Date.now()
+    tick(gl, vertices.size / 2, 0f, uModelMatrix, now)(now)
+
+  private def tick(
+      gl: WebGLRenderingContext,
+      numVertices: Int,
+      currentAngle: Float,
+      uModelMatrix: WebGLUniformLocation,
+      lastCallTs: Double
+  )(
+      currentTs: Double
+  ): Unit =
+    val elapsedSeconds   = (currentTs - lastCallTs) / 1000
+    val degreesPerSecond = 45.0
+    val nextAngle        = (currentAngle + degreesPerSecond * elapsedSeconds).toFloat % 360f
+//    dom.console.log(s"elapsedSeconds $elapsedSeconds, currentAngle $currentAngle, nextAngle $nextAngle")
+    draw(gl, numVertices, nextAngle, uModelMatrix)
+    val _                = window.requestAnimationFrame(
+      tick(gl, numVertices, nextAngle, uModelMatrix, currentTs)(_)
     )
+
+  private def draw(
+      gl: WebGLRenderingContext,
+      numVertices: Int,
+      currentAngle: Float,
+      uModelMatrix: WebGLUniformLocation
+  ): Unit =
+    gl.uniformMatrix4fv(
+      location = uModelMatrix,
+      transpose = false,
+      value = Matrix4.setRotate(currentAngle, 0f, 0f, 1f).toFloat32Array
+    )
+    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,
       first = 0,
-      count = vertices.size / 2
+      count = numVertices
     )

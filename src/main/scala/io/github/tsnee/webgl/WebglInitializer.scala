@@ -2,9 +2,7 @@ package io.github.tsnee.webgl
 
 import io.github.tsnee.webgl.ProgramCreator.createProgram
 import io.github.tsnee.webgl.ShaderCreator.createShader
-import org.scalajs.dom
-import org.scalajs.dom.WebGLProgram
-import org.scalajs.dom.WebGLRenderingContext
+import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js.JSON
@@ -18,7 +16,7 @@ object WebglInitializer:
   ): Unit =
     Option(canvas.getContext("webgl")) match
       case None                            =>
-        dom.console.log("Cannot get webgl context from HTML Canvas element.")
+        console.log("Cannot get webgl context from HTML Canvas element.")
       case Some(gl: WebGLRenderingContext) =>
         val result =
           for
@@ -35,10 +33,10 @@ object WebglInitializer:
             program        <- createProgram(gl, vertexShader, fragmentShader)
           yield run(gl, program)
         result match
-          case Left(error) => dom.console.log(error)
+          case Left(error) => console.log(error)
           case Right(())   => ()
       case Some(unexpected)                =>
-        dom.console.log(
+        console.log(
           "Expected webgl context of type WebGLRenderingContext, found " +
             JSON.stringify(unexpected)
         )

@@ -29,6 +29,7 @@ lazy val webgl = project.in(file("."))
      * It provides static types for the browser DOM APIs. */
     libraryDependencies ++= List(
       "org.scala-js"  %%% "scalajs-dom" % "2.8.0",
-      "org.typelevel" %%% "cats-core"   % "2.10.0"
+      "org.typelevel" %%% "cats-core"   % "2.10.0",
+      "org.scalameta" %%% "munit"       % "0.7.29" % Test
     )
   )

@@ -1,22 +1,25 @@
-package io.github.tsnee.webgl.chapter3
+package io.github.tsnee.webgl.chapter4
 
 import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object MultiPoint:
-  val vertexShaderSource: String = """
+object RotatedTriangleMatrix4:
+  val vertexShaderSource: String =
+    """
 attribute vec4 a_Position;
+uniform mat4 u_xformMatrix;
 void main() {
-  gl_Position = a_Position;
-  gl_PointSize = 10.0;
+  gl_Position = u_xformMatrix * a_Position;
 }
 """
 
-  val fragmentShaderSource: String = """
+  val fragmentShaderSource: String =
+    """
 void main() {
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
@@ -55,8 +58,15 @@ void main() {
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
+    val uXformMatrix = gl.getUniformLocation(program, "u_xformMatrix")
+    val xformMatrix  = Matrix4.setRotate(90f, 0f, 0f, 1f)
+    gl.uniformMatrix4fv(
+      location = uXformMatrix,
+      transpose = false,
+      value = xformMatrix.toFloat32Array
+    )
     gl.drawArrays(
-      mode = WebGLRenderingContext.POINTS,
+      mode = WebGLRenderingContext.TRIANGLES,
       first = 0,
       count = vertices.size / 2
     )

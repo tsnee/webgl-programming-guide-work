@@ -1,15 +1,34 @@
 package io.github.tsnee.webgl.chapter2
 
-import io.github.tsnee.webgl.ChapterSummary.createPanel
-import org.scalajs.dom._
+import io.github.tsnee.webgl.Example
+
+import java.net.URI
 
 object Summary:
-  def component: Node =
-    val row = document.createElement("div")
-    row.classList.add("flex")
-    row.appendChild(createPanel("HelloCanvas", HelloCanvas.initialize))
-    row.appendChild(createPanel("HelloPoint1", HelloPoint1.initialize))
-    row.appendChild(createPanel("HelloPoint2", HelloPoint2.initialize))
-    row.appendChild(createPanel("ClickedPoints", ClickedPoints.initialize))
-    row.appendChild(createPanel("ColoredPoints", ColoredPoints.initialize))
-    row
+  def examples: List[Example] = List(
+    Example(
+      "HelloCanvas",
+      HelloCanvas.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch02/HelloCanvas.html")
+    ),
+    Example(
+      "HelloPoint1",
+      HelloPoint1.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch02/HelloPoint1.html")
+    ),
+    Example(
+      "HelloPoint2",
+      HelloPoint2.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch02/HelloPoint2.html")
+    ),
+    Example(
+      "ClickedPoints",
+      ClickedPoints.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch02/ClickedPoints.html")
+    ),
+    Example(
+      "ColoredPoints",
+      ColoredPoints.initialize,
+      URI("https://rodger.global-linguist.com/webgl/ch02/ColoredPoints.html")
+    )
+  )

@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter3
+package io.github.tsnee.webgl.chapter4
 
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
@@ -7,16 +7,18 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object MultiPoint:
-  val vertexShaderSource: String = """
+object RotatedTranslatedTriangle:
+  val vertexShaderSource: String =
+    """
 attribute vec4 a_Position;
+uniform mat4 u_modelMatrix;
 void main() {
-  gl_Position = a_Position;
-  gl_PointSize = 10.0;
+  gl_Position = u_modelMatrix * a_Position;
 }
 """
 
-  val fragmentShaderSource: String = """
+  val fragmentShaderSource: String =
+    """
 void main() {
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
@@ -34,7 +36,7 @@ void main() {
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    val vertices     = Float32Array(js.Array(0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f))
+    val vertices     = Float32Array(js.Array(0f, 0.3f, -0.3f, -0.3f, 0.3f, -0.3f))
     val vertexBuffer = gl.createBuffer()
     gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
     gl.bufferData(
@@ -55,8 +57,15 @@ void main() {
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
+    val uModelMatrix = gl.getUniformLocation(program, "u_modelMatrix")
+    val modelMatrix  = Matrix4.setTranslate(0.5f, 0f, 0f).rotate(60f, 0f, 0f, 1f)
+    gl.uniformMatrix4fv(
+      location = uModelMatrix,
+      transpose = false,
+      value = modelMatrix.toFloat32Array
+    )
     gl.drawArrays(
-      mode = WebGLRenderingContext.POINTS,
+      mode = WebGLRenderingContext.TRIANGLES,
       first = 0,
       count = vertices.size / 2
     )

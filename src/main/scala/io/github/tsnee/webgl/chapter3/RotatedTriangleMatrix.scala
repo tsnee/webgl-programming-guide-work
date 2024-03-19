@@ -1,8 +1,7 @@
 package io.github.tsnee.webgl.chapter3
 
 import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom.WebGLProgram
-import org.scalajs.dom.WebGLRenderingContext
+import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js

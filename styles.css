@@ -1,12 +1,37 @@
-div.flex {
+h1 {
+  text-align: center;
+}
+nav {
   display: flex;
 }
-div {
-  margin: 2em;
+.parent { display: block; position: relative; float: left; line-height: 30px; }
+.parent span { margin-left: 3em; }
+.parent:hover > ul { display: block; position: absolute; }
+.child { display: none; }
+.child li {
+  line-height: 30px;
+  border: #CCC 1px solid;
+  width: 100%;
+  background-color: black;
+  color: white;
+  padding: 10px;
 }
-fieldset {
-  margin: 2em;
+ul { list-style-type: none; }
+main {
+  display: flex;
+  padding-left: 10%;
 }
 p {
   text-align: center;
+}
+div.container { padding: 2em; width: 425px; height: 425px; }
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  overflow: hidden;
+}
+canvas {
+  padding-top: 5px;
+  padding-bottom: 20px;
 }
