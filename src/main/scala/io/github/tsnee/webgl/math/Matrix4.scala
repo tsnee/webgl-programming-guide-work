@@ -106,9 +106,18 @@ object Matrix4:
       upY: Float,
       upZ: Float
   ): Matrix4 =
-    val alpha = (Math.atan(eyeY / eyeZ) * 180.0 / Math.PI).toFloat
-    val beta  = (Math.atan(eyeX / eyeZ) * 180.0 / Math.PI).toFloat
-    setRotate(alpha, 1f, 0f, 0f).rotate(-beta, 0f, 1f, 0f)
+    val (v1x, v1y, v1z) = (-eyeX, -eyeY, -eyeZ)
+    val (v2x, v2y, v2z) = (atX, atY, atZ) match
+      case (0f, 0f, 0f) => (upX, upY, upZ)
+      case _ => (atX - eyeX, atY - eyeY, atZ - eyeZ)
+    val crossX = v1y * v2z - v1z * v2y
+    val crossY = v1z * v2x - v1x * v2z
+    val crossZ = v1x * v2y - v1y * v2x
+    val v1Magnitude = Math.sqrt(v1x * v1x + v1y * v1y + v1z * v1z)
+    val v2Magnitude = Math.sqrt(v2x * v2x + v2y * v2y + v2z * v2z)
+    val crossMagnitude = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ)
+    val theta  = (Math.asin(crossMagnitude / (v1Magnitude * v2Magnitude)) * 180.0 / Math.PI).toFloat
+    setRotate(theta, crossX, crossY, crossZ)
 
   def setRotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     val w       = Math.sqrt(x * x + y * y + z * z)
