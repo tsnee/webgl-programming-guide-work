@@ -19,6 +19,7 @@ object App:
             appendChapter(ul, iframe, 2, chapter2.Summary.examples)
             appendChapter(ul, iframe, 3, chapter3.Summary.examples)
             appendChapter(ul, iframe, 4, chapter4.Summary.examples)
+            appendChapter(ul, iframe, 5, chapter5.Summary.examples)
       case _                                                 =>
         val errorMessage = document.createElement("span")
         errorMessage.innerText = s"This HTML document doesn't have the right elements."

@@ -19,5 +19,6 @@ object ShaderCreator:
     compileStatus match
       case b: Boolean if b => shader.asRight
       case _               =>
+        val err = s"Shader type $typ failed to compile: ${gl.getShaderInfoLog(shader)}".asLeft
         gl.deleteShader(shader)
-        s"Shader type $typ failed to compile: ${gl.getShaderInfoLog(shader)}".asLeft
+        err

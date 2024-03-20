@@ -21,5 +21,6 @@ object ProgramCreator:
     linkStatus match
       case b: Boolean if b => program.asRight
       case _               =>
+        val err = s"Program failed to compile: ${gl.getProgramInfoLog(program)}".asLeft
         gl.deleteProgram(program)
-        s"Program failed to compile: ${gl.getProgramInfoLog(program)}".asLeft
+        err
