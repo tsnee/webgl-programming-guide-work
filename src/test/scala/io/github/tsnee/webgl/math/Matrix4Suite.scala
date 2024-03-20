@@ -43,6 +43,6 @@ class Matrix4Suite extends FunSuite:
 
   test("translation followed by rotation"):
     val model    = Matrix4.setRotate(60f, 0f, 0f, 1f).translate(0.5f, 0f, 0f)
-    val actual   = model * Vec4(0f, 0f, 0f, 1f)
-    val expected = Vec4(0.25f, (Math.sqrt(3) / 4).toFloat, 0f, 1f)
+    val actual   = model * Vec4.point(0f, 0f, 0f)
+    val expected = Vec4.point(0.25f, (Math.sqrt(3) / 4).toFloat, 0f)
     assertEq(actual, expected)

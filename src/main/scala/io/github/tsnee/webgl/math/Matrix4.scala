@@ -106,18 +106,29 @@ object Matrix4:
       upY: Float,
       upZ: Float
   ): Matrix4 =
-    val (v1x, v1y, v1z) = (-eyeX, -eyeY, -eyeZ)
-    val (v2x, v2y, v2z) = (atX, atY, atZ) match
-      case (0f, 0f, 0f) => (upX, upY, upZ)
-      case _ => (atX - eyeX, atY - eyeY, atZ - eyeZ)
-    val crossX = v1y * v2z - v1z * v2y
-    val crossY = v1z * v2x - v1x * v2z
-    val crossZ = v1x * v2y - v1y * v2x
-    val v1Magnitude = Math.sqrt(v1x * v1x + v1y * v1y + v1z * v1z)
-    val v2Magnitude = Math.sqrt(v2x * v2x + v2y * v2y + v2z * v2z)
-    val crossMagnitude = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ)
-    val theta  = (Math.asin(crossMagnitude / (v1Magnitude * v2Magnitude)) * 180.0 / Math.PI).toFloat
-    setRotate(theta, crossX, crossY, crossZ)
+    val forward        = Vec4.direction(eyeX - atX, eyeY - atY, eyeZ - atZ).normal
+    val oldUp          = Vec4.direction(upX, upY, upZ)
+    val right          = oldUp.cross(forward).normal
+    val newUp          = forward.cross(right)
+    val rotationMatrix = Matrix4(
+      right(0),
+      newUp(0),
+      -forward(0),
+      0f,
+      right(1),
+      newUp(1),
+      -forward(1),
+      0f,
+      right(2),
+      newUp(2),
+      -forward(2),
+      0f,
+      0f,
+      0f,
+      0f,
+      1f
+    )
+    rotationMatrix.translate(-eyeX, -eyeY, -eyeZ)
 
   def setRotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     val w       = Math.sqrt(x * x + y * y + z * z)
