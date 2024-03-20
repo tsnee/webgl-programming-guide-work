@@ -1,6 +1,7 @@
 package io.github.tsnee.webgl.chapter4
 
 import io.github.tsnee.webgl.WebglInitializer
+import io.github.tsnee.webgl.math.Matrix4
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 

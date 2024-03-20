@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter4
+package io.github.tsnee.webgl.math
 
 import scala.annotation.targetName
 import scala.scalajs.js

@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter4
+package io.github.tsnee.webgl.math
 
 import munit.Assertions.assertEqualsFloat
 import munit.FunSuite

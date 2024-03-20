@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter4
+package io.github.tsnee.webgl.math
 
 import cats._
 import cats.syntax.all._
@@ -94,6 +94,21 @@ object Matrix4:
     d2,
     d3
   )))
+
+  def setLookAt(
+      eyeX: Float,
+      eyeY: Float,
+      eyeZ: Float,
+      atX: Float,
+      atY: Float,
+      atZ: Float,
+      upX: Float,
+      upY: Float,
+      upZ: Float
+  ): Matrix4 =
+    val alpha = (Math.atan(eyeY / eyeZ) * 180.0 / Math.PI).toFloat
+    val beta  = (Math.atan(eyeX / eyeZ) * 180.0 / Math.PI).toFloat
+    setRotate(alpha, 1f, 0f, 0f).rotate(-beta, 0f, 1f, 0f)
 
   def setRotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     val w       = Math.sqrt(x * x + y * y + z * z)

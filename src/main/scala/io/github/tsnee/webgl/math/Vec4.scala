@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter4
+package io.github.tsnee.webgl.math
 
 import cats._
 import cats.syntax.all._
