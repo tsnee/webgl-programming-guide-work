@@ -14,7 +14,7 @@ export default defineConfig(({ command }) => {
     return {
       base: "https://tsnee.github.io/webgl-programming-guide-work/",
       build: {
-	outDir: "_site",
+        outDir: "_site",
       },
       plugins: [scalaJSPlugin()],
     }

@@ -57,7 +57,7 @@ void main() {
     val texture           = gl.createTexture()
     val image             = Image()
     image.addEventListener("load", loadTexture(gl, verticesTexCoords.size / 4, texture, uSampler, image))
-    image.src = "public/sky.jpg"
+    image.src = "sky.jpg"
 
   private def loadTexture(
       gl: WebGLRenderingContext,

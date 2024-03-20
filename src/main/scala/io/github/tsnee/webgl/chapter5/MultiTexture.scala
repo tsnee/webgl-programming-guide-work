@@ -59,10 +59,10 @@ void main() {
     val texture1          = gl.createTexture()
     val image0            = Image()
     image0.addEventListener("load", loadTexture(gl, verticesTexCoords.size / 4, texture0, uSampler0, image0, 0))
-    image0.src = "public/sky.jpg"
+    image0.src = "sky.jpg"
     val image1            = Image()
     image1.addEventListener("load", loadTexture(gl, verticesTexCoords.size / 4, texture1, uSampler1, image1, 1))
-    image1.src = "public/circle.gif"
+    image1.src = "circle.gif"
 
   private val loadMask = mutable.BitSet()
 
