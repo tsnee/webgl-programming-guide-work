@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter4
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import io.github.tsnee.webgl.math.Matrix4
 import org.scalajs.dom._
@@ -8,7 +9,9 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object RotatedTranslatedTriangle:
+object RotatedTranslatedTriangle extends Exercise:
+  override def label: String = "RotatedTranslatedTriangle"
+
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
@@ -59,7 +62,7 @@ void main() {
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     val uModelMatrix = gl.getUniformLocation(program, "u_modelMatrix")
-    val modelMatrix  = Matrix4.setTranslate(0.5f, 0f, 0f).rotate(60f, 0f, 0f, 1f)
+    val modelMatrix  = Matrix4.setRotate(60f, 0f, 0f, 1f).translate(0.5f, 0f, 0f)
     gl.uniformMatrix4fv(
       location = uModelMatrix,
       transpose = false,

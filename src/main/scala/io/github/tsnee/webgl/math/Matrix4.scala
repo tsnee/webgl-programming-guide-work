@@ -130,6 +130,26 @@ object Matrix4:
     )
     rotationMatrix.translate(-eyeX, -eyeY, -eyeZ)
 
+  def setOrtho(left: Float, right: Float, bottom: Float, top: Float, near: Float, far: Float): Matrix4 =
+    Matrix4(
+      2f / (right - left),
+      0f,
+      0f,
+      0f,
+      0f,
+      2f / (top - bottom),
+      0f,
+      0f,
+      0f,
+      0f,
+      -2f / (far - near),
+      0f,
+      -(right + left) / (right - left),
+      -(top + bottom) / (top - bottom),
+      -(far + near) / (far - near),
+      1f
+    )
+
   def setRotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     val w       = Math.sqrt(x * x + y * y + z * z)
     val xNorm   = x / w

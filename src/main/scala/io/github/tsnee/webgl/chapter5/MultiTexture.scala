@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter5
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
@@ -8,7 +9,9 @@ import scala.collection.mutable
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object MultiTexture:
+object MultiTexture extends Exercise:
+  override val label: String = "MultiTexture"
+
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;

@@ -3,15 +3,14 @@ package io.github.tsnee.webgl.chapter7
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom.WebGLProgram
-import org.scalajs.dom.WebGLRenderingContext
+import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object LookAtTriangles extends Exercise:
-  override val label: String = "LookAtTriangles"
+object LookAtTrianglesWithKeys extends Exercise:
+  override val label: String = "LookAtTrianglesWithKeys"
 
   val vertexShaderSource: String =
     """
@@ -33,6 +32,10 @@ void main() {
   gl_FragColor = v_Color;
 }
 """
+
+  private val gViewMatrixValues                                = Array(0.20f, 0.25f, 0.25f, 0f, 0f, 0f, 0f, 1f, 0f)
+  // indices into gViewMatrixValues
+  private val (eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ) = (0, 1, 2, 3, 4, 5, 6, 7, 8)
 
   def initialize(canvas: Canvas): Unit =
     WebglInitializer.initialize(
@@ -65,16 +68,59 @@ void main() {
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     val uViewMatrix    = gl.getUniformLocation(program, "u_ViewMatrix")
-    val viewMatrix     = Matrix4.setLookAt(0.20f, 0.25f, 0.25f, 0f, 0f, 0f, 0f, 1f, 0f)
     gl.uniformMatrix4fv(
       location = uViewMatrix,
       transpose = false,
-      value = viewMatrix.toFloat32Array
+      value = Matrix4.setLookAt(
+        gViewMatrixValues(eyeX),
+        gViewMatrixValues(eyeY),
+        gViewMatrixValues(eyeZ),
+        gViewMatrixValues(atX),
+        gViewMatrixValues(atY),
+        gViewMatrixValues(atZ),
+        gViewMatrixValues(upX),
+        gViewMatrixValues(upY),
+        gViewMatrixValues(upZ)
+      ).toFloat32Array
     )
+    val numVertices    = verticesColors.size / 6
+    document.addEventListener("keydown", keyDown(gl, numVertices, uViewMatrix)(_))
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,
       first = 0,
-      count = verticesColors.size / 6
+      count = numVertices
+    )
+
+  private def keyDown(
+      gl: WebGLRenderingContext,
+      numVertices: Int,
+      uViewMatrix: WebGLUniformLocation
+  )(evt: KeyboardEvent): Unit =
+    evt.keyCode match
+      case 37 | 72 => gViewMatrixValues(eyeX) -= 0.01f // Left arrow or 'h'
+      case 39 | 76 => gViewMatrixValues(eyeX) += 0.01f // Right arrow or 'l'
+      case 40 | 74 => gViewMatrixValues(eyeY) -= 0.01f // Down arrow or 'j'
+      case 38 | 75 => gViewMatrixValues(eyeY) += 0.01f // Up arrow or 'k'
+    gl.uniformMatrix4fv(
+      location = uViewMatrix,
+      transpose = false,
+      value = Matrix4.setLookAt(
+        gViewMatrixValues(eyeX),
+        gViewMatrixValues(eyeY),
+        gViewMatrixValues(eyeZ),
+        gViewMatrixValues(atX),
+        gViewMatrixValues(atY),
+        gViewMatrixValues(atZ),
+        gViewMatrixValues(upX),
+        gViewMatrixValues(upY),
+        gViewMatrixValues(upZ)
+      ).toFloat32Array
+    )
+    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
+    gl.drawArrays(
+      mode = WebGLRenderingContext.TRIANGLES,
+      first = 0,
+      count = numVertices
     )
 
   private def initializeVbo(gl: WebGLRenderingContext, array: Float32Array): Unit =

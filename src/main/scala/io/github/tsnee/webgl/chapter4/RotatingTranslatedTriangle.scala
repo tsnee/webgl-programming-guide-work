@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter4
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import io.github.tsnee.webgl.math.Matrix4
 import org.scalajs.dom._
@@ -8,7 +9,9 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object RotatingTranslatedTriangle:
+object RotatingTranslatedTriangle extends Exercise:
+  override def label: String = "RotatingTranslatedTriangle"
+
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;

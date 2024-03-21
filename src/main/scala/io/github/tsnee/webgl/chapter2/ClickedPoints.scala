@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter2
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
@@ -7,7 +8,9 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object ClickedPoints:
+object ClickedPoints extends Exercise:
+  override def label: String = "ClickedPoints"
+
   val vertexShaderSource: String = """
 attribute vec4 a_Position;
 void main() {

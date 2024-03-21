@@ -10,17 +10,18 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object LookAtTriangles extends Exercise:
-  override val label: String = "LookAtTriangles"
+object LookAtRotatedTriangles extends Exercise:
+  override val label: String = "LookAtRotatedTriangles"
 
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
 uniform mat4 u_ViewMatrix;
+uniform mat4 u_ModelMatrix;
 varying vec4 v_Color;
 void main() {
-  gl_Position = u_ViewMatrix * a_Position;
+  gl_Position = u_ViewMatrix * u_ModelMatrix * a_Position;
   v_Color = a_Color;
 }
 """
@@ -70,6 +71,13 @@ void main() {
       location = uViewMatrix,
       transpose = false,
       value = viewMatrix.toFloat32Array
+    )
+    val uModelMatrix   = gl.getUniformLocation(program, "u_ModelMatrix")
+    val modelMatrix    = Matrix4.setRotate(-10, 0, 0, 1)
+    gl.uniformMatrix4fv(
+      location = uModelMatrix,
+      transpose = false,
+      value = modelMatrix.toFloat32Array
     )
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,

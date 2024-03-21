@@ -1,24 +1,21 @@
-package io.github.tsnee.webgl.chapter4
+package io.github.tsnee.webgl.chapter3
 
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
-import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom.WebGLProgram
-import org.scalajs.dom.WebGLRenderingContext
+import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object RotatedTriangleMatrix4 extends Exercise:
-  override def label: String = "RotatedTriangle_Matrix4"
+abstract class AbstractHelloTriangle(arrayDrawingMode: Int, suffix: String = "") extends Exercise:
+  override def label: String = s"HelloTriangle$suffix"
 
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
-uniform mat4 u_xformMatrix;
 void main() {
-  gl_Position = u_xformMatrix * a_Position;
+  gl_Position = a_Position;
 }
 """
 
@@ -62,15 +59,8 @@ void main() {
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
-    val uXformMatrix = gl.getUniformLocation(program, "u_xformMatrix")
-    val xformMatrix  = Matrix4.setRotate(90f, 0f, 0f, 1f)
-    gl.uniformMatrix4fv(
-      location = uXformMatrix,
-      transpose = false,
-      value = xformMatrix.toFloat32Array
-    )
     gl.drawArrays(
-      mode = WebGLRenderingContext.TRIANGLES,
+      mode = arrayDrawingMode,
       first = 0,
       count = vertices.size / 2
     )

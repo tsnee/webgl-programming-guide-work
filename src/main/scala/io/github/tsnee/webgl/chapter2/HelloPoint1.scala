@@ -1,10 +1,13 @@
 package io.github.tsnee.webgl.chapter2
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
-object HelloPoint1:
+object HelloPoint1 extends Exercise:
+  override def label: String = "HelloPoint1"
+
   val vertexShaderSource: String = """
 void main() {
   gl_Position = vec4(0.0, 0.0, 0.0, 1.0);

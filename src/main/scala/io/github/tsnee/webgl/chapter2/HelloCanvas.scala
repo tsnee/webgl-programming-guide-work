@@ -1,12 +1,15 @@
 package io.github.tsnee.webgl.chapter2
 
+import io.github.tsnee.webgl.Exercise
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 
-object HelloCanvas:
+object HelloCanvas extends Exercise:
+  override def label: String = "HelloCanvas"
+
   def initialize(canvas: Canvas): Unit =
     Option(canvas.getContext("webgl")) match
       case None                            =>

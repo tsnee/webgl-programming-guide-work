@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter5
 
+import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
@@ -7,7 +8,9 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object MultiAttributeSizeInterleaved:
+object MultiAttributeSizeInterleaved extends Exercise:
+  override val label: String = "MultiAttributeSize_Interleaved"
+
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;

@@ -5,7 +5,7 @@ nav {
   display: flex;
 }
 .parent { display: block; position: relative; float: left; line-height: 30px; }
-.parent span { margin-left: 3em; }
+.parent > span { margin-left: 3em; }
 .parent:hover > ul { display: block; position: absolute; }
 .child { display: none; }
 .child li {
@@ -24,14 +24,11 @@ main {
 p {
   text-align: center;
 }
-div.container { padding: 2em; width: 425px; height: 425px; }
+div.container { margin: 2em; }
 iframe {
-  width: 100%;
-  height: 100%;
   border: none;
   overflow: hidden;
 }
 canvas {
-  padding-top: 5px;
-  padding-bottom: 20px;
+  margin: 8px; // to match iframe body, at least on Chrome
 }

@@ -10,17 +10,17 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object LookAtTriangles extends Exercise:
-  override val label: String = "LookAtTriangles"
+object LookAtRotatedTrianglesMvMatrix extends Exercise:
+  override val label: String = "LookAtRotatedTriangles_mvMatrix"
 
   val vertexShaderSource: String =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
-uniform mat4 u_ViewMatrix;
+uniform mat4 u_ModelViewMatrix;
 varying vec4 v_Color;
 void main() {
-  gl_Position = u_ViewMatrix * a_Position;
+  gl_Position = u_ModelViewMatrix * a_Position;
   v_Color = a_Color;
 }
 """
@@ -46,8 +46,8 @@ void main() {
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    val floatSize      = Float32Array.BYTES_PER_ELEMENT
-    val verticesColors = Float32Array(js.Array(
+    val floatSize        = Float32Array.BYTES_PER_ELEMENT
+    val verticesColors   = Float32Array(js.Array(
       0.0f, 0.5f, -0.4f, 0.4f, 1.0f, 0.4f, // The back green triangle
       -0.5f, -0.5f, -0.4f, 0.4f, 1.0f, 0.4f,
       0.5f, -0.5f, -0.4f, 1.0f, 0.4f, 0.4f,
@@ -64,12 +64,14 @@ void main() {
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
-    val uViewMatrix    = gl.getUniformLocation(program, "u_ViewMatrix")
-    val viewMatrix     = Matrix4.setLookAt(0.20f, 0.25f, 0.25f, 0f, 0f, 0f, 0f, 1f, 0f)
+    val uModelViewMatrix = gl.getUniformLocation(program, "u_ModelViewMatrix")
+    val viewMatrix       = Matrix4.setLookAt(0.20f, 0.25f, 0.25f, 0f, 0f, 0f, 0f, 1f, 0f)
+    val modelMatrix      = Matrix4.setRotate(-10, 0, 0, 1)
+    val modelViewMatrix  = viewMatrix * modelMatrix
     gl.uniformMatrix4fv(
-      location = uViewMatrix,
+      location = uModelViewMatrix,
       transpose = false,
-      value = viewMatrix.toFloat32Array
+      value = modelViewMatrix.toFloat32Array
     )
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,

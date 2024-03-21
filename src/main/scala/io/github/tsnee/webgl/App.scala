@@ -4,63 +4,86 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
+/** Populates the <nav> element with nested <ul>s, div#scala-js with a Canvas, and div#js with an iframe.
+  *
+  * All Canvas objects are 400x400.
+  */
 object App:
-  val navPanelId = "navigation"
-  val canvasId   = "app"
+  private val exerciseContainerId = "scala-js"
+  private val origialContainerId  = "js"
 
   @main def run(): Unit =
     (
-      Option(document.querySelector(s"#$navPanelId")),
-      Option(document.querySelector(s"iframe"))
+      Option(document.querySelector("nav")),
+      Option(document.querySelector(s"#$exerciseContainerId")),
+      Option(document.querySelector(s"#$origialContainerId"))
     ) match
-      case (Some(navPanel), Some(iframe: HTMLIFrameElement)) =>
-        navPanel.appendChild(document.createElement("ul")) match
-          case ul =>
-            appendChapter(ul, iframe, 2, chapter2.Summary.examples)
-            appendChapter(ul, iframe, 3, chapter3.Summary.examples)
-            appendChapter(ul, iframe, 4, chapter4.Summary.examples)
-            appendChapter(ul, iframe, 5, chapter5.Summary.examples)
-            appendChapter(ul, iframe, 7, chapter7.Summary.examples)
-      case _                                                 =>
-        val errorMessage = document.createElement("span")
+      case (Some(navPanel), Some(exerciseComponent), Some(originalComponent)) =>
+        val ul = navPanel.appendChild(document.createElement("ul"))
+        appendChapter(ul, exerciseComponent, originalComponent, chapter2.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter3.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter4.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter5.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter7.Summary)
+      case _                                                                  =>
+        val errorMessage = document.createElement("h1")
         errorMessage.innerText = s"This HTML document doesn't have the right elements."
         val _            = document.body.appendChild(errorMessage)
 
   private def appendChapter(
       outerUl: Node,
-      iframe: HTMLIFrameElement,
-      n: Int,
-      examples: List[Example]
+      exerciseComponent: Element,
+      originalComponent: Element,
+      summary: ChapterSummary
   ): Unit =
     outerUl.appendChild(document.createElement("li")) match
-      case outerLi: HTMLLIElement =>
+      case outerLi: Element =>
         outerLi.classList.add("parent")
-        outerLi.appendChild(document.createElement("span")).innerText = s"Chapter $n"
+        outerLi.appendChild(document.createElement("span")).innerText = s"Chapter ${summary.chapter}"
         outerLi.appendChild(document.createElement("ul")) match
-          case innerUl: HTMLUListElement =>
+          case innerUl: Element =>
             innerUl.classList.add("child")
-            examples.foreach(appendExample(innerUl, iframe))
+            summary.exercises.foreach(appendExample(innerUl, exerciseComponent, originalComponent, summary.chapter))
 
-  private def appendExample(ul: Node, iframe: HTMLIFrameElement)(example: Example): Unit =
+  private def appendExample(
+      ul: Node,
+      exerciseComponent: Element,
+      originalComponent: Element,
+      chapter: Int
+  )(exercise: Exercise): Unit =
     val innerLi = ul.appendChild(document.createElement("li"))
-    innerLi.appendChild(document.createElement("span")) match
-      case span =>
-        span.innerText = example.title
-        span.addEventListener("click", onClick(example, iframe))
+    val span    = innerLi.appendChild(document.createElement("span"))
+    span.innerText = exercise.label
+    span.addEventListener("click", onClick(chapter, exercise, exerciseComponent, originalComponent))
 
-  private def onClick(example: Example, iframe: HTMLIFrameElement): js.Function1[Event, Unit] =
+  private def onClick(
+      chapter: Int,
+      exercise: Exercise,
+      exerciseContainer: Element,
+      originalContainer: Element
+  ): js.Function1[Event, Unit] =
     _ =>
-      iframe.src = example.originalJsPageUri.toASCIIString
-      Option(document.querySelector(s"#$canvasId")) match
-        case Some(oldCanvas) =>
-          document.createElement("canvas") match
-            case newCanvas: HTMLCanvasElement =>
-              newCanvas.id = canvasId
-              newCanvas.width = 400
-              newCanvas.height = 400
-              oldCanvas.replaceWith(newCanvas)
-              example.activate(newCanvas)
-        case _               =>
-          val errorMessage = document.createElement("span")
+      (
+        Option(exerciseContainer.querySelector(s"#${Exercise.componentId}")),
+        Option(originalContainer.querySelector("iframe"))
+      ) match
+        case (Some(exerciseComponent), Some(iframe: HTMLIFrameElement)) =>
+          iframe.width = exercise.width.toString
+          iframe.height = exercise.height.toString
+          iframe.src = originalUrl(chapter, exercise.label)
+          val newComponent = exercise.build
+          exerciseComponent.replaceWith(newComponent)
+          newComponent.setAttribute("id", Exercise.componentId)
+          newComponent.setAttribute(
+            "style",
+            s"width: ${exercise.width.toString}px; height: ${exercise.height.toString}px;"
+          )
+        case _                                                          =>
+          val errorMessage = document.createElement("h1")
           errorMessage.innerText = s"This HTML document doesn't have the right elements."
           val _            = document.body.appendChild(errorMessage)
+
+  private def originalUrl(chapter: Int, basename: String): String =
+    val chapterPart = f"ch$chapter%02d" // left-pad with at most one '0' e.g. "ch05"
+    val filename    = s"$basename.html"
+    s"https://rodger.global-linguist.com/webgl/$chapterPart/$filename"
