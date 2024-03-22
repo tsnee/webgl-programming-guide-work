@@ -30,6 +30,7 @@ lazy val webgl = project.in(file("."))
     libraryDependencies ++= List(
       "org.scala-js"  %%% "scalajs-dom" % "2.8.0",
       "org.typelevel" %%% "cats-core"   % "2.10.0",
+      "ai.dragonfly"  %%% "slash"       % "0.3.1",
       "org.scalameta" %%% "munit"       % "0.7.29" % Test
     )
   )

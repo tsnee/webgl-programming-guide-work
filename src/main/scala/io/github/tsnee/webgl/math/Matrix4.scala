@@ -2,6 +2,8 @@ package io.github.tsnee.webgl.math
 
 import cats._
 import cats.syntax.all._
+import narr.NArray
+import slash.matrix._
 
 import scala.annotation.targetName
 import scala.scalajs.js
@@ -11,7 +13,8 @@ final case class Matrix4(private val backingStore: Float32Array)
     extends BackedByFloat32Array:
   lhs =>
 
-  override def toFloat32Array: Float32Array = Float32Array(backingStore)
+  /** Column major order. */
+  override lazy val toFloat32Array: Float32Array = Float32Array(backingStore)
 
   def apply(column: Int, row: Int): Float =
     backingStore.get(column * 4 + row)
@@ -49,6 +52,15 @@ final case class Matrix4(private val backingStore: Float32Array)
   ): Matrix4 =
     lhs * Matrix4.setLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ)
 
+  lazy val invert: Matrix4 =
+    val doubles: Array[Double] = backingStore.toArray.map(_.toDouble)
+    val matrix                 = Matrix[4, 4](NArray(doubles*))
+    val floats                 = matrix.inverse.values.toArray.map(_.toFloat)
+    Matrix4(Float32Array(js.Array(floats*)))
+
+  def perspective(fov: Float, aspect: Float, near: Float, far: Float): Matrix4 =
+    lhs * Matrix4.setPerspective(fov, aspect, near, far)
+
   def rotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     lhs * Matrix4.setRotate(degrees, x, y, z)
 
@@ -57,6 +69,16 @@ final case class Matrix4(private val backingStore: Float32Array)
 
   def translate(x: Float, y: Float, z: Float): Matrix4 =
     lhs * Matrix4.setTranslate(x, y, z)
+
+  lazy val transpose: Matrix4 =
+    val copy = toFloat32Array
+    for
+      col <- 0 until 4
+      row <- col until 4
+    yield
+      copy(col * 4 + row) = backingStore(row * 4 + col)
+      copy(row * 4 + col) = backingStore(col * 4 + row)
+    Matrix4(copy)
 
 object Matrix4:
   given eqMatrix4(using f: Eq[BackedByFloat32Array]): Eq[Matrix4] = Eq.instance:
@@ -72,6 +94,7 @@ object Matrix4:
 
   def apply(): Matrix4 = Matrix4(Float32Array(16))
 
+  /** Params are in column-major order. */
   def apply(
       a0: Float,
       a1: Float,

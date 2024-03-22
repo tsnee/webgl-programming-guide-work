@@ -4,10 +4,6 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
-/** Populates the <nav> element with nested <ul>s, div#scala-js with a Canvas, and div#js with an iframe.
-  *
-  * All Canvas objects are 400x400.
-  */
 object App:
   private val exerciseContainerId = "scala-js"
   private val origialContainerId  = "js"
@@ -25,6 +21,7 @@ object App:
         appendChapter(ul, exerciseComponent, originalComponent, chapter4.Summary)
         appendChapter(ul, exerciseComponent, originalComponent, chapter5.Summary)
         appendChapter(ul, exerciseComponent, originalComponent, chapter7.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter8.Summary)
       case _                                                                  =>
         val errorMessage = document.createElement("h1")
         errorMessage.innerText = s"This HTML document doesn't have the right elements."

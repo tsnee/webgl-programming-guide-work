@@ -11,7 +11,9 @@ final case class Vec4(private val backingStore: Float32Array)
     extends BackedByFloat32Array:
   rhs =>
 
-  override def toFloat32Array: Float32Array = Float32Array(backingStore)
+  override lazy val toFloat32Array: Float32Array = Float32Array(backingStore)
+
+  lazy val to3dFloat32Array: Float32Array = Float32Array(backingStore.subarray(0, 3))
 
   def apply(row: Int): Float =
     backingStore.get(row)
