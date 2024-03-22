@@ -10,6 +10,15 @@ val Summary = ChapterSummary(
     LookAtRotatedTrianglesMvMatrix,
     LookAtTrianglesWithKeys,
     OrthoView,
-    LookAtTrianglesWithKeysViewVolume
+    LookAtTrianglesWithKeysViewVolume,
+    OrthoViewHalfSize,
+    OrthoViewHalfWidth,
+    PerspectiveView,
+    PerspectiveViewMvp,
+    DepthBuffer,
+    Zfighting,
+    HelloCube,
+    ColoredCube,
+    ColoredCubeSingleColor
   )
 )

@@ -36,6 +36,19 @@ final case class Matrix4(private val backingStore: Float32Array)
     lhs(0, 3) * rhs(3, 0) + lhs(1, 3) * rhs(3, 1) + lhs(2, 3) * rhs(3, 2) + lhs(3, 3) * rhs(3, 3)
   )))
 
+  def lookAt(
+      eyeX: Float,
+      eyeY: Float,
+      eyeZ: Float,
+      atX: Float,
+      atY: Float,
+      atZ: Float,
+      upX: Float,
+      upY: Float,
+      upZ: Float
+  ): Matrix4 =
+    lhs * Matrix4.setLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ)
+
   def rotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
     lhs * Matrix4.setRotate(degrees, x, y, z)
 
@@ -148,6 +161,30 @@ object Matrix4:
       -(top + bottom) / (top - bottom),
       -(far + near) / (far - near),
       1f
+    )
+
+  /** Calculate the perspective projection matrix) that defines the viewing volume specified by its arguments. */
+  def setPerspective(fov: Float, aspect: Float, near: Float, far: Float): Matrix4 =
+    val radians  = Math.toRadians(fov).toFloat
+    val depth    = (1.0 / Math.tan(radians / 2.0)).toFloat
+    val rangeInv = (1.0 / (near - far)).toFloat
+    Matrix4(
+      depth / aspect,
+      0f,
+      0f,
+      0f,
+      0f,
+      depth,
+      0f,
+      0f,
+      0f,
+      0f,
+      (far + near) * rangeInv,
+      -1,
+      0f,
+      0f,
+      2 * far * near * rangeInv,
+      0f
     )
 
   def setRotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4 =
