@@ -9,6 +9,7 @@ val Summary = ChapterSummary(
     LookAtRotatedTriangles,
     LookAtRotatedTrianglesMvMatrix,
     LookAtTrianglesWithKeys,
-    OrthoView
+    OrthoView,
+    LookAtTrianglesWithKeysViewVolume
   )
 )

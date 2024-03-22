@@ -106,10 +106,10 @@ object Matrix4:
       upY: Float,
       upZ: Float
   ): Matrix4 =
-    val forward        = Vec4.direction(eyeX - atX, eyeY - atY, eyeZ - atZ).normal
+    val forward        = Vec4.direction(atX - eyeX, atY - eyeY, atZ - eyeZ).normal
     val oldUp          = Vec4.direction(upX, upY, upZ)
-    val right          = oldUp.cross(forward).normal
-    val newUp          = forward.cross(right)
+    val right          = forward.cross(oldUp).normal
+    val newUp          = right.cross(forward)
     val rotationMatrix = Matrix4(
       right(0),
       newUp(0),
