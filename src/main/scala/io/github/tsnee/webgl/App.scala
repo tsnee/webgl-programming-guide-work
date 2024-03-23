@@ -23,7 +23,7 @@ object App:
         appendChapter(ul, exerciseComponent, originalComponent, chapter7.Summary)
         appendChapter(ul, exerciseComponent, originalComponent, chapter8.Summary)
         appendChapter(ul, exerciseComponent, originalComponent, chapter9.Summary)
-//        appendChapter(ul, exerciseComponent, originalComponent, chapter10.Summary)
+        appendChapter(ul, exerciseComponent, originalComponent, chapter10.Summary)
       case _                                                                  =>
         val errorMessage = document.createElement("h1")
         errorMessage.innerText = s"This HTML document doesn't have the right elements."
