@@ -14,7 +14,9 @@ object ProgramCreator:
   ): Either[String, WebGLProgram] =
     val program         = gl.createProgram()
     gl.attachShader(program, vertexShader)
+    gl.deleteShader(vertexShader)
     gl.attachShader(program, fragmentShader)
+    gl.deleteShader(fragmentShader)
     gl.linkProgram(program)
     val linkStatus: Any =
       gl.getProgramParameter(program, WebGLRenderingContext.LINK_STATUS)
