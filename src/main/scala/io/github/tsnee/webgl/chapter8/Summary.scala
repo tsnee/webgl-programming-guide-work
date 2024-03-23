@@ -7,6 +7,8 @@ val Summary = ChapterSummary(
   List(
     LightedCube,
     LightedCubeAmbient,
-    LightedTranslatedRotatedCube
+    LightedTranslatedRotatedCube,
+    PointLightedCube,
+    PointLightedCubePerFragment
   )
 )
