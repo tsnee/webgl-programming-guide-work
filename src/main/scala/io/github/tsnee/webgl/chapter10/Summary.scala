@@ -7,6 +7,13 @@ val Summary = ChapterSummary(
   List(
     RotateObject,
     PickObject,
-    PickFace
+    PickFace,
+    Hud,
+    ThreeDOverWeb,
+    Fog,
+    FogW,
+    RoundedPoints,
+    LookAtBlendedTriangles,
+    BlendedCube
   )
 )

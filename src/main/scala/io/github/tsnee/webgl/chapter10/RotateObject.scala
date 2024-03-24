@@ -139,15 +139,15 @@ void main() {
     canvas.addEventListener(
       "mousedown",
       (ev: MouseEvent) =>
-        gMouseState(dragging) = 1
         val mouseX = ev.clientX
         val mouseY = ev.clientY
         val rect   = ev.target match
           case elem: Element => elem.getBoundingClientRect()
           case _             => new DOMRect
         if rect.left <= mouseX && mouseX < rect.right &&
-          rect.top <= mouseY && mouseY < rect.top
+          rect.top <= mouseY && mouseY < rect.bottom
         then
+          gMouseState(dragging) = 1
           gMouseState(lastX) = mouseX.toInt
           gMouseState(lastY) = mouseY.toInt
     )

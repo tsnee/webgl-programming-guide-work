@@ -95,7 +95,10 @@ void main() {
       gl: WebGLRenderingContext,
       numVertices: Int,
       uViewMatrix: WebGLUniformLocation
-  )(evt: KeyboardEvent): Unit =
+  )(
+      evt: KeyboardEvent
+  ): Unit =
+    evt.preventDefault()
     evt.keyCode match
       case 37 | 72 => gViewMatrixValues(eyeX) -= 0.01f // Left arrow or 'h'
       case 39 | 76 => gViewMatrixValues(eyeX) += 0.01f // Right arrow or 'l'

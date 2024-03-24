@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl.chapter7
+package io.github.tsnee.webgl.chapter10
 
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
@@ -9,8 +9,8 @@ import org.scalajs.dom.html.Canvas
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object LookAtTrianglesWithKeysViewVolume extends Exercise:
-  override val label: String = "LookAtTrianglesWithKeys_ViewVolume"
+object LookAtBlendedTriangles extends Exercise:
+  override val label: String = "LookAtBlendedTriangles"
 
   val vertexShaderSource: String =
     """
@@ -50,22 +50,24 @@ void main() {
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
+    gl.enable(WebGLRenderingContext.BLEND)
+    gl.blendFunc(WebGLRenderingContext.SRC_ALPHA, WebGLRenderingContext.ONE_MINUS_SRC_ALPHA)
     val floatSize      = Float32Array.BYTES_PER_ELEMENT
-    val verticesColors = Float32Array(js.Array(
-      0.0f, 0.5f, -0.4f, 0.4f, 1.0f, 0.4f, // The back green triangle
-      -0.5f, -0.5f, -0.4f, 0.4f, 1.0f, 0.4f,
-      0.5f, -0.5f, -0.4f, 1.0f, 0.4f, 0.4f,
-      0.5f, 0.4f, -0.2f, 1.0f, 0.4f, 0.4f, // The middle yellow triangle
-      -0.5f, 0.4f, -0.2f, 1.0f, 1.0f, 0.4f,
-      0.0f, -0.6f, -0.2f, 1.0f, 1.0f, 0.4f,
-      0.0f, 0.5f, 0.0f, 0.4f, 0.4f, 1.0f,  // The front blue triangle
-      -0.5f, -0.5f, 0.0f, 0.4f, 0.4f, 1.0f,
-      0.5f, -0.5f, 0.0f, 1.0f, 0.4f, 0.4f
+    val verticesColors = Float32Array(js.Array[Float](
+      0.0, 0.5, -0.4, 0.4, 1.0, 0.4, 0.4, // The back green triangle
+      -0.5, -0.5, -0.4, 0.4, 1.0, 0.4, 0.4,
+      0.5, -0.5, -0.4, 1.0, 0.4, 0.4, 0.4,
+      0.5, 0.4, -0.2, 1.0, 0.4, 0.4, 0.4, // The middle yellow triangle
+      -0.5, 0.4, -0.2, 1.0, 1.0, 0.4, 0.4,
+      0.0, -0.6, -0.2, 1.0, 1.0, 0.4, 0.4,
+      0.0, 0.5, 0.0, 0.4, 0.4, 1.0, 0.4,  // The front blue triangle
+      -0.5, -0.5, 0.0, 0.4, 0.4, 1.0, 0.4,
+      0.5, -0.5, 0.0, 1.0, 0.4, 0.4, 0.4
     ))
     initializeVbo(gl, verticesColors)
-    enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 6, 0)
-    enableFloatAttribute(gl, program, "a_Color", 3, floatSize * 6, floatSize * 3)
-    gl.clearColor(0f, 0f, 0f, 1f)
+    enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 7, 0)
+    enableFloatAttribute(gl, program, "a_Color", 4, floatSize * 7, floatSize * 3)
+    gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     val uViewMatrix    = gl.getUniformLocation(program, "u_ViewMatrix")
@@ -90,7 +92,7 @@ void main() {
       transpose = false,
       value = Matrix4.setOrtho(left = -1f, right = 1f, bottom = -1f, top = 1f, near = 0f, far = 2f).toFloat32Array
     )
-    val numVertices    = verticesColors.size / 6
+    val numVertices    = verticesColors.size / 7
     document.addEventListener("keydown", keyDown(gl, numVertices, uViewMatrix)(_))
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,
