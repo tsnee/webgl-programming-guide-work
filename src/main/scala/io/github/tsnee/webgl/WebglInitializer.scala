@@ -1,7 +1,7 @@
 package io.github.tsnee.webgl
 
-import io.github.tsnee.webgl.ProgramCreator.createProgram
-import io.github.tsnee.webgl.ShaderCreator.createShader
+import io.github.tsnee.webgl.common.ProgramCreator.createProgram
+import io.github.tsnee.webgl.common.ShaderCreator.createShader
 import org.scalajs.dom._
 import org.scalajs.dom.html.Canvas
 

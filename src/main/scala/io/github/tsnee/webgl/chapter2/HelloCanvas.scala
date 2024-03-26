@@ -1,25 +1,33 @@
 package io.github.tsnee.webgl.chapter2
 
-import io.github.tsnee.webgl.Exercise
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import cats._
+import cats.syntax.all._
+import com.raquo.laminar.api.L._
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.HTMLCanvasElement
+import org.scalajs.dom.WebGLRenderingContext
 
 import scala.scalajs.js
-import scala.scalajs.js.JSON
 
-object HelloCanvas extends Exercise:
-  override def label: String = "HelloCanvas"
+object HelloCanvas:
+  def panel(height: Height, width: Width): Element =
+    val canvas = canvasTag(heightAttr := height, widthAttr := width)
+    extractContext(canvas.ref) match
+      case Right(gl)   =>
+        useWebgl(gl)
+        div(canvas)
+      case Left(error) =>
+        div(error)
 
-  def initialize(canvas: Canvas): Unit =
+  private def useWebgl(gl: WebGLRenderingContext): Unit =
+    gl.clearColor(0, 0, 0, 1)
+    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
+
+  private def extractContext(canvas: HTMLCanvasElement): Either[String, WebGLRenderingContext] =
     Option(canvas.getContext("webgl")) match
       case None                            =>
-        console.log("Cannot get webgl context from HTML Canvas element.")
+        "Cannot get WebGL context from HTML Canvas element.".asLeft
       case Some(gl: WebGLRenderingContext) =>
-        gl.clearColor(0f, 0f, 0f, 1f)
-        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
+        gl.asRight
       case Some(unexpected)                =>
-        console.log(
-          "Expected webgl context of type WebGLRenderingContext, found " + JSON.stringify(
-            unexpected
-          )
-        )
+        s"Expected canvas context of type WebGLRenderingContext, found $unexpected.".asLeft

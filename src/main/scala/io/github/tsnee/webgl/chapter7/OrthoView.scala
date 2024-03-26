@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter7
 
+import com.raquo.laminar.api.L.{Element => _, Image => _, _}
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import io.github.tsnee.webgl.math.Matrix4
@@ -11,6 +12,11 @@ import scala.scalajs.js.typedarray.Float32Array
 
 object OrthoView extends Exercise:
   override val label: String = "OrthoView"
+
+  lazy val panel: com.raquo.laminar.api.L.Element =
+    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
+    initialize(canvas.ref)
+    div(canvas)
 
   override val height: Int = 500
 

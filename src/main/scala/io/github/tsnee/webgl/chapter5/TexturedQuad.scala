@@ -1,17 +1,25 @@
 package io.github.tsnee.webgl.chapter5
 
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.iltotore.iron.constraint.all._
+import io.github.tsnee.webgl._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.TextureLoader
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.Image
+import org.scalajs.dom.UIEvent
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
+import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object TexturedQuad extends Exercise:
-  override val label: String = "TexturedQuad"
-
-  val vertexShaderSource: String =
+object TexturedQuad:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec2 a_TexCoord;
@@ -22,7 +30,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 uniform sampler2D u_Sampler;
@@ -32,74 +40,24 @@ void main() {
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      @unused canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
     val floatSize         = Float32Array.BYTES_PER_ELEMENT
     val verticesTexCoords =
-      Float32Array(js.Array(-0.5f, 0.5f, 0f, 1f, -0.5f, -0.5f, 0f, 0f, 0.5f, 0.5f, 1f, 1f, 0.5f, -0.5f, 1f, 0f))
-    initializeVbo(gl, verticesTexCoords)
-    enableFloatAttribute(gl, program, "a_Position", 2, floatSize * 4, 0)
-    enableFloatAttribute(gl, program, "a_TexCoord", 2, floatSize * 4, floatSize * 2)
+      Float32Array(js.Array[Float](-0.5, 0.5, 0, 1, -0.5, -0.5, 0, 0, 0.5, 0.5, 1, 1, 0.5, -0.5, 1, 0))
+    VertexBufferObject.initializeVbo(gl, verticesTexCoords)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 2, floatSize * 4, 0)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_TexCoord", 2, floatSize * 4, floatSize * 2)
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.useProgram(program)
     val uSampler          = gl.getUniformLocation(program, "u_Sampler")
     val texture           = gl.createTexture()
     val image             = Image()
-    image.addEventListener("load", loadTexture(gl, verticesTexCoords.size / 4, texture, uSampler, image))
+    image.addEventListener("load", TextureLoader.loadTexture(gl, verticesTexCoords.size / 4, texture, uSampler, image))
     image.src = "sky.jpg"
-
-  private def loadTexture(
-      gl: WebGLRenderingContext,
-      numVertices: Int,
-      texture: WebGLTexture,
-      sampler: WebGLUniformLocation,
-      image: Image
-  ): js.Function1[UIEvent, Unit] =
-    import WebGLRenderingContext.*
-    _ =>
-      gl.pixelStorei(UNPACK_FLIP_Y_WEBGL, 1)
-      gl.activeTexture(TEXTURE0)
-      gl.bindTexture(TEXTURE_2D, texture)
-      gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
-      gl.texImage2D(TEXTURE_2D, 0, RGB, RGB, UNSIGNED_BYTE, image)
-      gl.uniform1i(sampler, 0)
-      gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
-      gl.drawArrays(
-        mode = WebGLRenderingContext.TRIANGLE_STRIP,
-        first = 0,
-        count = numVertices
-      )
-
-  private def initializeVbo(gl: WebGLRenderingContext, array: Float32Array): Unit =
-    val vertexTexCoordsBuffer = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexTexCoordsBuffer)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-
-  private def enableFloatAttribute(
-      gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      attributeName: String,
-      size: Int,
-      stride: Int,
-      offset: Int
-  ): Unit =
-    val attribute = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = WebGLRenderingContext.FLOAT,
-      normalized = false,
-      stride = stride,
-      offset = offset
-    )
-    gl.enableVertexAttribArray(attribute)

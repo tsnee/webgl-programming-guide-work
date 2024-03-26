@@ -1,12 +1,33 @@
-package io.github.tsnee.webgl
+package io.github.tsnee.webgl.common
 
+import cats._
 import cats.syntax.all._
+import io.github.tsnee.webgl.types._
 import org.scalajs.dom
 import org.scalajs.dom.WebGLProgram
 import org.scalajs.dom.WebGLRenderingContext
 import org.scalajs.dom.WebGLShader
 
 object ProgramCreator:
+  def createProgram(
+      gl: WebGLRenderingContext,
+      vertexShaderSource: VertexShaderSource,
+      fragmentShaderSource: FragmentShaderSource
+  ): Either[String, WebGLProgram] =
+    for
+      vertexShader   <- ShaderCreator.createShader(
+                          gl,
+                          WebGLRenderingContext.VERTEX_SHADER,
+                          vertexShaderSource
+                        )
+      fragmentShader <- ShaderCreator.createShader(
+                          gl,
+                          WebGLRenderingContext.FRAGMENT_SHADER,
+                          fragmentShaderSource
+                        )
+      program        <- createProgram(gl, vertexShader, fragmentShader)
+    yield program
+
   def createProgram(
       gl: WebGLRenderingContext,
       vertexShader: WebGLShader,

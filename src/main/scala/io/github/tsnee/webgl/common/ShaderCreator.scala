@@ -1,4 +1,4 @@
-package io.github.tsnee.webgl
+package io.github.tsnee.webgl.common
 
 import cats.syntax.all._
 import org.scalajs.dom

@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter8
 
+import com.raquo.laminar.api.L.{Element => _, Image => _, _}
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import io.github.tsnee.webgl.math.Matrix4
@@ -12,6 +13,11 @@ import scala.scalajs.js.typedarray.Uint8Array
 
 object PointLightedCubePerFragment extends Exercise:
   override val label: String = "PointLightedCube_perFragment"
+
+  lazy val panel: com.raquo.laminar.api.L.Element =
+    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
+    initialize(canvas.ref)
+    div(canvas)
 
   val vertexShaderSource: String =
     """

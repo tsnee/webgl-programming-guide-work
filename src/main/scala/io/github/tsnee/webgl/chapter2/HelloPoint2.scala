@@ -1,14 +1,17 @@
 package io.github.tsnee.webgl.chapter2
 
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.iltotore.iron.constraint.all._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
-object HelloPoint2 extends Exercise:
-  override def label: String = "HelloPoint2"
+import scala.annotation.unused
 
-  val vertexShaderSource: String = """
+object HelloPoint2:
+  val vertexShaderSource: VertexShaderSource = """
 attribute vec4 a_Position;
 void main() {
   gl_Position = a_Position;
@@ -16,24 +19,23 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String = """
+  val fragmentShaderSource: FragmentShaderSource = """
 void main() {
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(gl: WebGLRenderingContext, program: WebGLProgram): Unit =
+  private def useWebgl(
+      @unused canvas: Canvas,
+      gl: WebGLRenderingContext,
+      program: WebGLProgram
+  ): Unit =
     val aPosition = gl.getAttribLocation(program, "a_Position")
-    gl.vertexAttrib3f(aPosition, 0f, 0f, 0f)
-    gl.clearColor(0f, 0f, 0f, 1f)
+    gl.vertexAttrib3f(aPosition, 0, 0, 0)
+    gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     gl.drawArrays(WebGLRenderingContext.POINTS, 0, 1)

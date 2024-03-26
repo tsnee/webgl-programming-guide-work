@@ -1,17 +1,22 @@
 package io.github.tsnee.webgl.chapter3
 
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.iltotore.iron.constraint.all._
+import io.github.tsnee.webgl._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
+import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object RotatedTriangleMatrix extends Exercise:
-  override def label: String = "RotatedTriangle_Matrix"
-
-  val vertexShaderSource: String =
+object RotatedTriangleMatrix:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 uniform mat4 u_xformMatrix;
@@ -20,68 +25,49 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 void main() {
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      @unused canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    val vertices     = Float32Array(js.Array(0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f))
-    val vertexBuffer = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
-    gl.bufferData(
-      WebGLRenderingContext.ARRAY_BUFFER,
-      vertices,
-      WebGLRenderingContext.STATIC_DRAW
-    )
-    val aPosition    = gl.getAttribLocation(program, "a_Position")
-    gl.vertexAttribPointer(
-      indx = aPosition,
-      size = 2,
-      `type` = WebGLRenderingContext.FLOAT,
-      normalized = false,
-      stride = 0,
-      offset = 0
-    )
-    gl.enableVertexAttribArray(aPosition)
-    gl.clearColor(0f, 0f, 0f, 1f)
+    val vertices     = Float32Array(js.Array[Float](0, 0.5, -0.5, -0.5, 0.5, -0.5))
+    VertexBufferObject.initializeVbo(gl, vertices)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", size = 2, stride = 0, offset = 0)
+    gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     val uXformMatrix = gl.getUniformLocation(program, "u_xformMatrix")
-    val degrees      = 90f
-    val radians      = Math.PI * degrees / 180f
+    val degrees      = 90
+    val radians      = Math.PI * degrees / 180
     val cosB         = Math.cos(radians).toFloat
     val sinB         = Math.sin(radians).toFloat
-    val xformMatrix  = Float32Array(js.Array(
+    val xformMatrix  = Float32Array(js.Array[Float](
       cosB,
       sinB,
-      0f,
-      0f,
+      0,
+      0,
       -sinB,
       cosB,
-      0f,
-      0f,
-      0f,
-      0f,
-      1f,
-      0f,
-      0f,
-      0f,
-      0f,
-      1f
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
     ))
     gl.uniformMatrix4fv(
       location = uXformMatrix,

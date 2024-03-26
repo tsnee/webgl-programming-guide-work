@@ -1,5 +1,6 @@
 package io.github.tsnee.webgl.chapter10
 
+import com.raquo.laminar.api.L.{Element => _, Image => _, _}
 import io.github.tsnee.webgl.Exercise
 import io.github.tsnee.webgl.WebglInitializer
 import org.scalajs.dom._
@@ -10,6 +11,11 @@ import scala.scalajs.js.typedarray.Float32Array
 
 object RoundedPoints extends Exercise:
   override def label: String = "RoundedPoints"
+
+  lazy val panel: com.raquo.laminar.api.L.Element =
+    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
+    initialize(canvas.ref)
+    div(canvas)
 
   val vertexShaderSource: String = """
 attribute vec4 a_Position;

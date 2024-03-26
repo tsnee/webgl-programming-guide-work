@@ -1,17 +1,21 @@
 package io.github.tsnee.webgl.chapter2
 
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.iltotore.iron.constraint.all._
+import io.github.tsnee.webgl._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.HTMLCanvasElement
+import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object ClickedPoints extends Exercise:
-  override def label: String = "ClickedPoints"
-
-  val vertexShaderSource: String = """
+object ClickedPoints:
+  val vertexShaderSource: VertexShaderSource = """
 attribute vec4 a_Position;
 void main() {
   gl_Position = a_Position;
@@ -19,48 +23,43 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String = """
+  val fragmentShaderSource: FragmentShaderSource = """
 void main() {
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run(canvas, _, _)
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def click(
-      ev: MouseEvent,
-      gl: WebGLRenderingContext,
-      canvas: Canvas,
-      aPosition: Int,
-      points: js.Array[Float]
-  ): Unit =
-    val rect = canvas.getBoundingClientRect()
-    val x    = ((ev.clientX - rect.left) - canvas.width / 2) / (canvas.width / 2)
-    val y    = (canvas.height / 2 - (ev.clientY - rect.top)) / (canvas.height / 2)
-    points.addAll(List(x.toFloat, y.toFloat, 0f))
-    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
-    points.sliding(3, 3).foreach: window =>
-      gl.vertexAttrib3fv(aPosition, Float32Array(window))
-      gl.drawArrays(WebGLRenderingContext.POINTS, 0, 1)
-
-  private def run(
+  private def useWebgl(
       canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    val aPosition    = gl.getAttribLocation(program, "a_Position")
-    gl.vertexAttrib3f(aPosition, 0f, 0f, 0f)
-    gl.clearColor(0f, 0f, 0f, 1f)
+    gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
-    val storedPoints = js.Array[Float]()
-    canvas.addEventListener(
-      "click",
-      click(_, gl, canvas, aPosition, storedPoints)
-    )
+    val aPosition                                    = gl.getAttribLocation(program, "a_Position")
+    val (clickedPointStream, clickedPointListSignal) = normalizeAndRecordClicks(canvas.ref)
+    canvas.amend(onClick --> clickedPointStream, clickedPointListSignal --> draw(gl, aPosition))
+
+  private def normalizeAndRecordClicks(
+      canvasElement: HTMLCanvasElement
+  ): (Observer[MouseEvent], Signal[List[(Float, Float, Float)]]) =
+    val pointEventBus          = EventBus[(Float, Float, Float)]()
+    val clickedPointStream     = pointEventBus.writer.contramap[MouseEvent]: evt =>
+      val rect = canvasElement.getBoundingClientRect()
+      val x    = ((evt.clientX - rect.left) - canvasElement.width / 2) / (canvasElement.width / 2)
+      val y    = (canvasElement.height / 2 - (evt.clientY - rect.top)) / (canvasElement.height / 2)
+      (x.toFloat, y.toFloat, 0f)
+    val clickedPointListSignal =
+      pointEventBus.events.scanLeft(Nil)((list, point) => point :: list)
+    (clickedPointStream, clickedPointListSignal)
+
+  private def draw(gl: WebGLRenderingContext, aPosition: Int)(pointList: List[(Float, Float, Float)]): Unit =
+    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
+    pointList.foreach:
+      case (x, y, z) =>
+        gl.vertexAttrib3fv(aPosition, Float32Array(js.Array(x, y, z)))
+        gl.drawArrays(WebGLRenderingContext.POINTS, 0, 1)

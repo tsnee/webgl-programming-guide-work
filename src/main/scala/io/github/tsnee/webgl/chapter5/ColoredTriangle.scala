@@ -1,17 +1,22 @@
 package io.github.tsnee.webgl.chapter5
 
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.iltotore.iron.constraint.all._
+import io.github.tsnee.webgl._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.WebGLProgram
+import org.scalajs.dom.WebGLRenderingContext
 
+import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object ColoredTriangle extends Exercise:
-  override val label: String = "ColoredTriangle"
-
-  val vertexShaderSource: String =
+object ColoredTriangle:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -23,7 +28,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision highp float;
 varying vec4 v_Color;
@@ -32,48 +37,27 @@ void main() {
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      @unused canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    val verticesColors    = Float32Array(js.Array(0f, 0.5f, 1f, 0f, 0f, -0.5f, -0.5f, 0f, 1f, 0f, 0.5f, -0.5f, 0f, 0f, 1f))
-    val vertexColorBuffer = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexColorBuffer)
-    gl.bufferData(
-      WebGLRenderingContext.ARRAY_BUFFER,
-      verticesColors,
-      WebGLRenderingContext.STATIC_DRAW
-    )
-    val floatSizeBytes    = Float32Array.BYTES_PER_ELEMENT
-    val aPosition         = gl.getAttribLocation(program, "a_Position")
-    gl.vertexAttribPointer(
-      indx = aPosition,
+    val verticesColors = Float32Array(js.Array[Float](0, 0.5, 1, 0, 0, -0.5, -0.5, 0, 1, 0, 0.5, -0.5, 0, 0, 1))
+    VertexBufferObject.initializeVbo(gl, verticesColors)
+    val floatSizeBytes = Float32Array.BYTES_PER_ELEMENT
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", size = 2, stride = floatSizeBytes * 5, offset = 0)
+    WebglAttribute.enableFloatAttribute(
+      gl,
+      program,
+      "a_Color",
       size = 2,
-      `type` = WebGLRenderingContext.FLOAT,
-      normalized = false,
-      stride = floatSizeBytes * 5,
-      offset = 0
-    )
-    gl.enableVertexAttribArray(aPosition)
-    val aColor            = gl.getAttribLocation(program, "a_Color")
-    gl.vertexAttribPointer(
-      indx = aColor,
-      size = 3,
-      `type` = WebGLRenderingContext.FLOAT,
-      normalized = false,
       stride = floatSizeBytes * 5,
       offset = floatSizeBytes * 2
     )
-    gl.enableVertexAttribArray(aColor)
-    gl.clearColor(0f, 0f, 0f, 1f)
+    gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
     gl.drawArrays(
