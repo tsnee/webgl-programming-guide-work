@@ -4,9 +4,10 @@ import org.scalajs.dom.WebGLProgram
 import org.scalajs.dom.WebGLRenderingContext
 
 object WebglAttribute:
-  def enableFloatAttribute(
+  def enableAttribute(
       gl: WebGLRenderingContext,
       program: WebGLProgram,
+      attributeType: Int,
       attributeName: String,
       size: Int,
       stride: Int,
@@ -16,7 +17,7 @@ object WebglAttribute:
     gl.vertexAttribPointer(
       indx = attribute,
       size = size,
-      `type` = WebGLRenderingContext.FLOAT,
+      `type` = attributeType,
       normalized = false,
       stride = stride,
       offset = offset

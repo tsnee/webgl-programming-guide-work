@@ -1,27 +1,21 @@
 package io.github.tsnee.webgl.chapter10
 
-import com.raquo.laminar.api.L.{Element => _, Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import cats.syntax.all._
+import com.raquo.laminar.api.L.{Image => _, _}
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom
+import org.scalajs.dom.{Element => _, _}
 
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.Float32Array
-import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.typedarray._
 
-object Fog extends Exercise:
-  override val label: String = "Fog"
-
-  override def height: Int = 500
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  val vertexShaderSource: String =
+object Fog:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -37,7 +31,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 uniform vec3 u_FogColor;
@@ -51,19 +45,13 @@ void main() {
 }
 """
 
-  private val gFogDist = Array.ofDim[Float](2)
+  private val fogDist = Var[(Float, Float)](55, 80)
 
-  def initialize(canvas: Canvas): Unit =
-    Array[Float](55, 80).copyToArray(gFogDist)
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run(canvas, _, _)
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
-      canvas: HTMLCanvasElement,
+  private def useWebgl(
+      canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
@@ -72,7 +60,7 @@ void main() {
     val fogColor     = Float32Array(js.Array[Float](0.137, 0.231, 0.423))
     gl.uniform3fv(uFogColor, fogColor)
     val uFogDist     = gl.getUniformLocation(program, "u_FogDist")
-    gl.uniform2fv(uFogDist, Float32Array(js.Array[Float](gFogDist*)))
+    gl.uniform2fv(uFogDist, Float32Array(js.Array[Float](55, 80)))
     val uEye         = gl.getUniformLocation(program, "u_Eye")
     val eye          = Float32Array(js.Array[Float](25, 65, 35, 1))
     gl.uniform4fv(uEye, eye)
@@ -84,7 +72,16 @@ void main() {
       -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1, // v7-v4-v3-v2 down
       1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, vertices, 3, WebGLRenderingContext.FLOAT, "a_Position")
+    VertexBufferObject.initializeVbo(gl, vertices)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Position",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     val colors       = Float32Array(js.Array[Float](
       0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, // v0-v1-v2-v3 front
       0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, 0.4, 1.0, 0.4, // v0-v3-v4-v5 right
@@ -93,7 +90,16 @@ void main() {
       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, // v7-v4-v3-v2 down
       0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0, 0.4, 1.0, 1.0  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, colors, 3, WebGLRenderingContext.FLOAT, "a_Color")
+    VertexBufferObject.initializeVbo(gl, colors)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Color",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     val indices      = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
       4, 5, 6, 4, 6, 7,       // right
@@ -131,43 +137,26 @@ void main() {
       `type` = WebGLRenderingContext.UNSIGNED_BYTE,
       offset = 0
     )
-    canvas.setAttribute("tabindex", "0") // can't get focus to receive keyboard evts w/out this
-    canvas.addEventListener(
-      "keydown",
-      (ev: KeyboardEvent) =>
-        ev.preventDefault()
-        ev.key match
-          case KeyValue.ArrowUp                                => gFogDist(1) += 1
-          case KeyValue.ArrowDown if gFogDist(1) > gFogDist(0) => gFogDist(1) -= 1
-          case _                                               => ()
-        gl.uniform2fv(uFogDist, Float32Array(js.Array[Float](gFogDist*)))
-        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT)
-        gl.drawElements(
-          mode = WebGLRenderingContext.TRIANGLES,
-          count = indices.size,
-          `type` = WebGLRenderingContext.UNSIGNED_BYTE,
-          offset = 0
-        )
-    )
+    canvas.amend(tabIndex := 0, onKeyDown --> keyDown(gl, indices.length, uFogDist))
 
-  private def initializeVbo(
+  private def keyDown(
       gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      array: Float32Array,
-      size: Int,
-      typ: Int,
-      attributeName: String
-  ): Unit =
-    val vertexBufferObject = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBufferObject)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-    val attribute          = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = typ,
-      normalized = false,
-      stride = 0,
+      numIndices: Int,
+      uFogDist: WebGLUniformLocation
+  )(ev: KeyboardEvent): Unit =
+    ev.preventDefault()
+    val (xFogDist, yFogDist) = fogDist.now()
+    val delta                =
+      ev.key match
+        case KeyValue.ArrowUp                          => +1
+        case KeyValue.ArrowDown if yFogDist > xFogDist => -1
+        case _                                         => 0
+    fogDist.set(xFogDist + delta, yFogDist + delta)
+    gl.uniform2fv(uFogDist, Float32Array(js.Array[Float](xFogDist + delta, yFogDist + delta)))
+    gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT)
+    gl.drawElements(
+      mode = WebGLRenderingContext.TRIANGLES,
+      count = numIndices,
+      `type` = WebGLRenderingContext.UNSIGNED_BYTE,
       offset = 0
     )
-    gl.enableVertexAttribArray(attribute)

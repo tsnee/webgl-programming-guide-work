@@ -56,8 +56,8 @@ void main() {
       0.5f, -1.0f, -4.0f, 1.0f, 0.4f, 0.4f
     ))
     VertexBufferObject.initializeVbo(gl, verticesColors)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 6, 0)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, floatSize * 6, floatSize * 3)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 3, floatSize * 6, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Color", 3, floatSize * 6, floatSize * 3)
     gl.enable(WebGLRenderingContext.DEPTH_TEST)
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.useProgram(program)

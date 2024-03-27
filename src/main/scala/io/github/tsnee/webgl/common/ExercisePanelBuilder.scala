@@ -17,7 +17,7 @@ object ExercisePanelBuilder:
       val canvas           = canvasTag(heightAttr := height, widthAttr := width)
       val successOrFailure =
         for
-          gl <- ContextExtractor.extractContext(canvas.ref)
+          gl <- ContextExtractor.extractWebglContext(canvas.ref)
           pg <- ProgramCreator.createProgram(gl, vertexShaderSource, fragmentShaderSource)
         yield useWebgl(canvas, gl, pg)
       successOrFailure match

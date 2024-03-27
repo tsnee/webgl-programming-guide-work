@@ -1,24 +1,20 @@
 package io.github.tsnee.webgl.chapter10
 
-import com.raquo.laminar.api.L.{Element => _, Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import cats.syntax.all._
+import com.raquo.laminar.api.L.{Image => _, _}
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom
+import org.scalajs.dom.{Element => _, _}
 
+import scala.annotation.unused
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.Float32Array
+import scala.scalajs.js.typedarray._
 
-object LookAtBlendedTriangles extends Exercise:
-  override val label: String = "LookAtBlendedTriangles"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  val vertexShaderSource: String =
+object LookAtBlendedTriangles:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -31,7 +27,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 varying vec4 v_Color;
@@ -40,19 +36,21 @@ void main() {
 }
 """
 
-  private val gViewMatrixValues                                = Array(0.20f, 0.25f, 0.25f, 0f, 0f, 0f, 0f, 1f, 0f)
-  // indices into gViewMatrixValues
-  private val (eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ) = (0, 1, 2, 3, 4, 5, 6, 7, 8)
+  private val viewEyeX = Var[Float](0.20)
+  private val viewEyeY = Var[Float](0.25)
+  private val viewEyeZ = 0.25f
+  private val viewAtX  = 0f
+  private val viewAtY  = 0f
+  private val viewAtZ  = 0f
+  private val viewUpX  = 0f
+  private val viewUpY  = 1f
+  private val viewUpZ  = 0f
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      @unused canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
@@ -81,22 +79,22 @@ void main() {
       location = uViewMatrix,
       transpose = false,
       value = Matrix4.setLookAt(
-        eyeX = gViewMatrixValues(eyeX),
-        eyeY = gViewMatrixValues(eyeY),
-        eyeZ = gViewMatrixValues(eyeZ),
-        atX = gViewMatrixValues(atX),
-        atY = gViewMatrixValues(atY),
-        atZ = gViewMatrixValues(atZ),
-        upX = gViewMatrixValues(upX),
-        upY = gViewMatrixValues(upY),
-        upZ = gViewMatrixValues(upZ)
+        eyeX = viewEyeX.now(),
+        eyeY = viewEyeY.now(),
+        eyeZ = viewEyeZ,
+        atX = viewAtX,
+        atY = viewAtY,
+        atZ = viewAtZ,
+        upX = viewUpX,
+        upY = viewUpY,
+        upZ = viewUpZ
       ).toFloat32Array
     )
     val uProjMatrix    = gl.getUniformLocation(program, "u_ProjMatrix")
     gl.uniformMatrix4fv(
       location = uProjMatrix,
       transpose = false,
-      value = Matrix4.setOrtho(left = -1f, right = 1f, bottom = -1f, top = 1f, near = 0f, far = 2f).toFloat32Array
+      value = Matrix4.setOrtho(left = -1, right = 1, bottom = -1, top = 1, near = 0, far = 2).toFloat32Array
     )
     val numVertices    = verticesColors.size / 7
     document.addEventListener("keydown", keyDown(gl, numVertices, uViewMatrix)(_))
@@ -115,23 +113,23 @@ void main() {
   ): Unit =
     evt.preventDefault()
     evt.key match
-      case KeyValue.ArrowLeft | "h"  => gViewMatrixValues(eyeX) -= 0.01f
-      case KeyValue.ArrowRight | "l" => gViewMatrixValues(eyeX) += 0.01f
-      case KeyValue.ArrowDown | "j"  => gViewMatrixValues(eyeY) -= 0.01f
-      case KeyValue.ArrowUp | "k"    => gViewMatrixValues(eyeY) += 0.01f
+      case KeyValue.ArrowLeft | "h"  => viewEyeX.update(_ - 0.01f)
+      case KeyValue.ArrowRight | "l" => viewEyeX.update(_ + 0.01f)
+      case KeyValue.ArrowDown | "j"  => viewEyeY.update(_ - 0.01f)
+      case KeyValue.ArrowUp | "k"    => viewEyeY.update(_ + 0.01f)
     gl.uniformMatrix4fv(
       location = uViewMatrix,
       transpose = false,
       value = Matrix4.setLookAt(
-        eyeX = gViewMatrixValues(eyeX),
-        eyeY = gViewMatrixValues(eyeY),
-        eyeZ = gViewMatrixValues(eyeZ),
-        atX = gViewMatrixValues(atX),
-        atY = gViewMatrixValues(atY),
-        atZ = gViewMatrixValues(atZ),
-        upX = gViewMatrixValues(upX),
-        upY = gViewMatrixValues(upY),
-        upZ = gViewMatrixValues(upZ)
+        eyeX = viewEyeX.now(),
+        eyeY = viewEyeY.now(),
+        eyeZ = viewEyeZ,
+        atX = viewAtX,
+        atY = viewAtY,
+        atZ = viewAtZ,
+        upX = viewUpX,
+        upY = viewUpY,
+        upZ = viewUpZ
       ).toFloat32Array
     )
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)

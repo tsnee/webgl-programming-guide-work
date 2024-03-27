@@ -48,10 +48,19 @@ void main() {
     val verticesColors = Float32Array(js.Array[Float](0, 0.5, 1, 0, 0, -0.5, -0.5, 0, 1, 0, 0.5, -0.5, 0, 0, 1))
     VertexBufferObject.initializeVbo(gl, verticesColors)
     val floatSizeBytes = Float32Array.BYTES_PER_ELEMENT
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", size = 2, stride = floatSizeBytes * 5, offset = 0)
-    WebglAttribute.enableFloatAttribute(
+    WebglAttribute.enableAttribute(
       gl,
       program,
+      WebGLRenderingContext.FLOAT,
+      "a_Position",
+      size = 2,
+      stride = floatSizeBytes * 5,
+      offset = 0
+    )
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
       "a_Color",
       size = 2,
       stride = floatSizeBytes * 5,

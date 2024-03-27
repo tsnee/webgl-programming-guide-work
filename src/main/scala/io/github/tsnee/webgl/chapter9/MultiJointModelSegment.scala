@@ -118,7 +118,15 @@ void main() {
       0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0  // v4-v7-v6-v5 back
     ))
     VertexBufferObject.initializeVbo(gl, normals)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Normal", size = 3, stride = 0, offset = 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Normal",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     // Indices of the vertices
     val indices        = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front

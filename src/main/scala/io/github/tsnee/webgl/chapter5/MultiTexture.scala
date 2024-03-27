@@ -56,8 +56,16 @@ void main() {
     val verticesTexCoords =
       Float32Array(js.Array(-0.5f, 0.5f, 0f, 1f, -0.5f, -0.5f, 0f, 0f, 0.5f, 0.5f, 1f, 1f, 0.5f, -0.5f, 1f, 0f))
     VertexBufferObject.initializeVbo(gl, verticesTexCoords)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 2, floatSize * 4, 0)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_TexCoord", 2, floatSize * 4, floatSize * 2)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 2, floatSize * 4, 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_TexCoord",
+      2,
+      floatSize * 4,
+      floatSize * 2
+    )
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.useProgram(program)
     val uSampler0         = gl.getUniformLocation(program, "u_Sampler0")

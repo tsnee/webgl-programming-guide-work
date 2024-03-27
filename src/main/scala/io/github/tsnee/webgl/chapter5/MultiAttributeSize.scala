@@ -43,11 +43,27 @@ void main() {
   ): Unit =
     val sizes    = Float32Array(js.Array[Float](10, 20, 30))
     VertexBufferObject.initializeVbo(gl, sizes)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_PointSize", size = 1, stride = 0, offset = 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_PointSize",
+      size = 1,
+      stride = 0,
+      offset = 0
+    )
     gl.clearColor(0, 0, 0, 1)
     val vertices = Float32Array(js.Array[Float](0, 0.5, -0.5, -0.5, 0.5, -0.5))
     VertexBufferObject.initializeVbo(gl, vertices)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", size = 2, stride = 0, offset = 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Position",
+      size = 2,
+      stride = 0,
+      offset = 0
+    )
     gl.clearColor(0, 0, 0, 1)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)

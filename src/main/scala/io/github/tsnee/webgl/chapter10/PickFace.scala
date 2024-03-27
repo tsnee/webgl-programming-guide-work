@@ -1,25 +1,21 @@
 package io.github.tsnee.webgl.chapter10
 
-import com.raquo.laminar.api.L.{Element => _, Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import cats.syntax.all._
+import com.raquo.laminar.api.L.{Image => _, _}
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom
+import org.scalajs.dom.{Element => _, _}
 
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.ArrayBufferView
-import scala.scalajs.js.typedarray.Float32Array
-import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.typedarray._
 
-object PickFace extends Exercise:
-  override def label: String = "PickFace"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  private val vertexShaderSource = """
+object PickFace:
+  val vertexShaderSource: VertexShaderSource = """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
 attribute float a_Face;
@@ -38,7 +34,7 @@ void main() {
 }
 """
 
-  private val fragmentShaderSource = """
+  private val fragmentShaderSource: FragmentShaderSource = """
 precision highp float;
 varying vec4 v_Color;
 void main() {
@@ -46,18 +42,16 @@ void main() {
 }
 """
 
-  val gCurrentAngle: Array[Float] = Array.ofDim[Float](1)
+  private val currentAngle = Var[Float](0)
 
-  override def initialize(canvas: HTMLCanvasElement): Unit =
-    gCurrentAngle(0) = 0
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run(canvas, _, _)
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(canvas: HTMLCanvasElement, gl: WebGLRenderingContext, program: WebGLProgram): Unit =
+  private def useWebgl(
+      canvas: Canvas,
+      gl: WebGLRenderingContext,
+      program: WebGLProgram
+  ): Unit =
     val numIndices     = initVertexBuffers(gl, program)
     gl.clearColor(0, 0, 0, 1)
     gl.enable(WebGLRenderingContext.DEPTH_TEST)
@@ -68,23 +62,27 @@ void main() {
     val viewProjMatrix = Matrix4
       .setPerspective(30, gl.drawingBufferWidth.toFloat / gl.drawingBufferHeight, 1, 100)
       .lookAt(0, 0, 7, 0, 0, 0, 0, 1, 0)
-    canvas.addEventListener(
-      "mousedown",
-      (ev: MouseEvent) =>
-        val x    = ev.clientX
-        val y    = ev.clientY
-        val rect = ev.target match
-          case elem: Element => elem.getBoundingClientRect()
-        if rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom
-        then
-          val xInCanvas = (x - rect.left).toInt
-          val yInCanvas = (rect.bottom - y).toInt
-          val face      = checkFace(gl, numIndices, xInCanvas, yInCanvas, uPickedFace, viewProjMatrix, uMvpMatrix)
-          gl.uniform1i(uPickedFace, face)
-          draw(gl, numIndices, viewProjMatrix, uMvpMatrix)
-    )
+    canvas.amend(onMouseDown --> mouseDown(gl, numIndices, uPickedFace, viewProjMatrix, uMvpMatrix))
     val ts             = js.Date.now()
     val _              = tick(gl, numIndices, viewProjMatrix, uMvpMatrix, ts)(ts)
+
+  private def mouseDown(
+      gl: WebGLRenderingContext,
+      numIndices: Int,
+      uPickedFace: WebGLUniformLocation,
+      viewProjMatrix: Matrix4,
+      uMvpMatrix: WebGLUniformLocation
+  )(evt: MouseEvent): Unit =
+    val x    = evt.clientX
+    val y    = evt.clientY
+    val rect = gl.canvas.getBoundingClientRect()
+    if rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom
+    then
+      val xInCanvas = (x - rect.left).toInt
+      val yInCanvas = (rect.bottom - y).toInt
+      val face      = checkFace(gl, numIndices, xInCanvas, yInCanvas, uPickedFace, viewProjMatrix, uMvpMatrix)
+      gl.uniform1i(uPickedFace, face)
+      draw(gl, numIndices, viewProjMatrix, uMvpMatrix)
 
   private def tick(
       gl: WebGLRenderingContext,
@@ -99,9 +97,11 @@ void main() {
     draw(gl, numIndices, viewProjMatrix, uMvpMatrix)
     window.requestAnimationFrame(tick(gl, numIndices, viewProjMatrix, uMvpMatrix, curTs)(_))
 
+  private val angleStepDegrees = 20
+
   private def animate(prevTs: Double, curTs: Double): Unit =
     val elapsedMillis = curTs - prevTs
-    gCurrentAngle(0) = (gCurrentAngle(0) + (20 * elapsedMillis).toFloat / 1000) % 360
+    currentAngle.set((currentAngle.now() + (angleStepDegrees * elapsedMillis).toFloat / 1000) % 360)
 
   private def initVertexBuffers(gl: WebGLRenderingContext, program: WebGLProgram): Int =
     val vertices    = Float32Array(js.Array[Float](
@@ -112,7 +112,16 @@ void main() {
       -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, // v7-v4-v3-v2 down
       1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, vertices, 3, WebGLRenderingContext.FLOAT, "a_Position")
+    VertexBufferObject.initializeVbo(gl, vertices)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Position",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     val colors      = Float32Array(js.Array[Float](
       0.32, 0.18, 0.56, 0.32, 0.18, 0.56, 0.32, 0.18, 0.56, 0.32, 0.18, 0.56, // v0-v1-v2-v3 front
       0.5, 0.41, 0.69, 0.5, 0.41, 0.69, 0.5, 0.41, 0.69, 0.5, 0.41, 0.69,     // v0-v3-v4-v5 right
@@ -121,14 +130,24 @@ void main() {
       0.27, 0.58, 0.82, 0.27, 0.58, 0.82, 0.27, 0.58, 0.82, 0.27, 0.58, 0.82, // v7-v4-v3-v2 down
       0.73, 0.82, 0.93, 0.73, 0.82, 0.93, 0.73, 0.82, 0.93, 0.73, 0.82, 0.93  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, colors, 3, WebGLRenderingContext.FLOAT, "a_Color")
+    VertexBufferObject.initializeVbo(gl, colors)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Color",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     val jsFaces     =
       for
         face <- 1 to 6
         _    <- 0 until 4
       yield face.toShort
     val faces       = Uint8Array(js.Array[Short](jsFaces*))
-    initializeVbo(gl, program, faces, 1, WebGLRenderingContext.UNSIGNED_BYTE, "a_Face")
+    VertexBufferObject.initializeVbo(gl, faces)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.UNSIGNED_BYTE, "a_Face", 1, 0, 0)
     val indices     = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
       4, 5, 6, 4, 6, 7,       // right
@@ -164,31 +183,9 @@ void main() {
       uMvpMatrix: WebGLUniformLocation
   ): Unit =
     val mvpMatrix = viewProjMatrix
-      .rotate(gCurrentAngle(0), 1, 0, 0)
-      .rotate(gCurrentAngle(0), 0, 1, 0)
-      .rotate(gCurrentAngle(0), 0, 0, 1)
+      .rotate(currentAngle.now(), 1, 0, 0)
+      .rotate(currentAngle.now(), 0, 1, 0)
+      .rotate(currentAngle.now(), 0, 0, 1)
     gl.uniformMatrix4fv(uMvpMatrix, transpose = false, mvpMatrix.toFloat32Array)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT)
     gl.drawElements(WebGLRenderingContext.TRIANGLES, numIndices, WebGLRenderingContext.UNSIGNED_BYTE, offset = 0)
-
-  private def initializeVbo(
-      gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      array: ArrayBufferView,
-      size: Int,
-      typ: Int,
-      attributeName: String
-  ): Unit =
-    val vertexBufferObject = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBufferObject)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-    val attribute          = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = typ,
-      normalized = false,
-      stride = 0,
-      offset = 0
-    )
-    gl.enableVertexAttribArray(attribute)

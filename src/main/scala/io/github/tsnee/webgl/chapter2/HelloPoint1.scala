@@ -15,7 +15,7 @@ object HelloPoint1:
     val canvas           = canvasTag(heightAttr := height, widthAttr := width)
     val successOrFailure =
       for
-        gl <- ContextExtractor.extractContext(canvas.ref)
+        gl <- ContextExtractor.extractWebglContext(canvas.ref)
         pg <- ProgramCreator.createProgram(gl, vertexShaderSource, fragmentShaderSource)
         _   = useWebgl(gl, pg)
       yield ()

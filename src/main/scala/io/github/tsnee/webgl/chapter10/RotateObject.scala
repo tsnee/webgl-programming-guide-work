@@ -60,7 +60,15 @@ void main() {
       1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
     ))
     VertexBufferObject.initializeVbo(gl, vertices)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", size = 3, stride = 0, offset = 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Position",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     val texCoords      = Float32Array(js.Array[Float](
       1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, // v0-v1-v2-v3 front
       0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, // v0-v3-v4-v5 right
@@ -70,7 +78,15 @@ void main() {
       0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0  // v4-v7-v6-v5 back
     ))
     VertexBufferObject.initializeVbo(gl, texCoords)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_TexCoord", size = 2, stride = 0, offset = 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_TexCoord",
+      size = 2,
+      stride = 0,
+      offset = 0
+    )
     // Indices of the vertices
     val indices        = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front

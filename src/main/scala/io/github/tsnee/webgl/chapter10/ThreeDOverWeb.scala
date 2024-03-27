@@ -1,24 +1,22 @@
 package io.github.tsnee.webgl.chapter10
 
-import com.raquo.laminar.api.L.{Element => _, Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import cats.syntax.all._
+import com.raquo.laminar.api.L.{Image => _, _}
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ContextExtractor
+import io.github.tsnee.webgl.common.ProgramCreator
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom
+import org.scalajs.dom.{Element => _, _}
 
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.Float32Array
-import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.typedarray._
 
-object ThreeDOverWeb extends Exercise:
-  override val label: String = "3DoverWeb"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  val vertexShaderSource: String =
+object ThreeDOverWeb:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -30,7 +28,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 varying vec4 v_Color;
@@ -39,32 +37,33 @@ void main() {
 }
 """
 
-  override def build: Element =
-    val component = document.createElement("div")
-    component.setAttribute("id", Exercise.componentId)
-    (document.createElement("canvas"), document.createElement("iframe")) match
-      case (canvasWebgl: HTMLCanvasElement, iframe: HTMLIFrameElement) =>
-        canvasWebgl.width = Exercise.canvasWidth
-        canvasWebgl.height = Exercise.canvasHeight
-        iframe.width = "100%"
-        iframe.height = "100%"
-        iframe.src = "https://en.wikipedia.org/wiki/The_Design_of_Design"
-        canvasWebgl.setAttribute("style", "position: absolute; z-index: 1;")
-        iframe.setAttribute("style", "position: absolute; z-index: 0;")
-        initialize(canvasWebgl)
-        component.appendChild(canvasWebgl)
-        component.appendChild(iframe)
-        component
-
-  def initialize(canvas: HTMLCanvasElement): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
+  def panel(canvasHeight: Height, canvasWidth: Width): Element =
+    val canvas           = canvasTag(
+      heightAttr := canvasHeight,
+      widthAttr  := canvasWidth,
+      position   := "absolute",
+      zIndex     := 1,
+      left       := "50%",
+      top        := "45%",
+      transform  := "translate(-50%, -50%)"
     )
+    val web              = iframe(
+      width    := "100%",
+      height   := "100%",
+      src      := "https://en.wikipedia.org/wiki/The_Design_of_Design",
+      position := "absolute",
+      zIndex   := 0
+    )
+    val successOrFailure =
+      for
+        gl <- ContextExtractor.extractWebglContext(canvas.ref)
+        pg <- ProgramCreator.createProgram(gl, vertexShaderSource, fragmentShaderSource)
+      yield useWebgl(gl, pg)
+    successOrFailure match
+      case Right(())   => div(position := "relative", height := "100%", width := "100%", canvas, web)
+      case Left(error) => div(error)
 
-  private def run(
+  private def useWebgl(
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
@@ -97,7 +96,8 @@ void main() {
       -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
       1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
     ))
-    initializeVbo(gl, program, vertices, 3, WebGLRenderingContext.FLOAT, "a_Position")
+    VertexBufferObject.initializeVbo(gl, vertices)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 3, 0, 0)
     val colors      = Float32Array(js.Array[Float](
       0.2, 0.58, 0.82, 0.2, 0.58, 0.82, 0.2, 0.58, 0.82, 0.2, 0.58, 0.82,     // v0-v1-v2-v3 front
       0.5, 0.41, 0.69, 0.5, 0.41, 0.69, 0.5, 0.41, 0.69, 0.5, 0.41, 0.69,     // v0-v3-v4-v5 right
@@ -106,7 +106,16 @@ void main() {
       0.32, 0.18, 0.56, 0.32, 0.18, 0.56, 0.32, 0.18, 0.56, 0.32, 0.18, 0.56, // v7-v4-v3-v2 down
       0.73, 0.82, 0.93, 0.73, 0.82, 0.93, 0.73, 0.82, 0.93, 0.73, 0.82, 0.93  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, colors, 3, WebGLRenderingContext.FLOAT, "a_Color")
+    VertexBufferObject.initializeVbo(gl, colors)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_Color",
+      size = 3,
+      stride = 0,
+      offset = 0
+    )
     // Indices of the vertices
     val indices     = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
@@ -157,25 +166,3 @@ void main() {
       `type` = WebGLRenderingContext.UNSIGNED_BYTE,
       offset = 0
     )
-
-  private def initializeVbo(
-      gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      array: Float32Array,
-      size: Int,
-      typ: Int,
-      attributeName: String
-  ): Unit =
-    val vertexBufferObject = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBufferObject)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-    val attribute          = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = typ,
-      normalized = false,
-      stride = 0,
-      offset = 0
-    )
-    gl.enableVertexAttribArray(attribute)

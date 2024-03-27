@@ -68,8 +68,8 @@ void main() {
       0.5, -1.0, 0.0, 1.0, 0.4, 0.4
     ))
     VertexBufferObject.initializeVbo(gl, verticesColors)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 6, 0)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, floatSize * 6, floatSize * 3)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 3, floatSize * 6, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Color", 3, floatSize * 6, floatSize * 3)
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.useProgram(program)
     val uViewMatrix    = gl.getUniformLocation(program, "u_ViewMatrix")

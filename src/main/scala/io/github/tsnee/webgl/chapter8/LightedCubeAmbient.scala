@@ -61,7 +61,7 @@ void main() {
       1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
     ))
     VertexBufferObject.initializeVbo(gl, vertices)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 3, 0, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 3, 0, 0)
     val colors          = Float32Array(js.Array[Float](
       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
@@ -71,7 +71,7 @@ void main() {
       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0
     ))
     VertexBufferObject.initializeVbo(gl, colors)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, 0, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Color", 3, 0, 0)
     val normals         = Float32Array(js.Array[Float](
       0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,     // v0-v1-v2-v3 front
       1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,     // v0-v3-v4-v5 right
@@ -81,7 +81,7 @@ void main() {
       0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1  // v4-v7-v6-v5 back
     ))
     VertexBufferObject.initializeVbo(gl, normals)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Normal", 3, 0, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Normal", 3, 0, 0)
     val indices         = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
       4, 5, 6, 4, 6, 7,       // right

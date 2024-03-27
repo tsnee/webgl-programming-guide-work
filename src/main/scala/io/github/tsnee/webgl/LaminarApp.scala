@@ -14,6 +14,8 @@ import scala.collection.SortedSet
 object LaminarApp:
   val CanvasHeight: Height           = 400
   val CanvasWidth: Width             = 400
+  // nav elements z-index is MaxZindex - chapter#, so lower-numbered chapters appear over higher ones
+  val MaxZindex: Int                 = 12
   val NavPanelSelector: String       = "nav"
   val ExercisePanelSelector: String  = "div#scala-js"
   val AnswerKeyPanelSelector: String = "div#js"
@@ -87,16 +89,16 @@ object LaminarApp:
     ExerciseDescriptor("JointModel", 9, 0, 525, 450, chapter9.JointModel.panel),
     ExerciseDescriptor("MultiJointModel", 9, 1, 550, 450, chapter9.MultiJointModel.panel),
     ExerciseDescriptor("MultiJointModel_segment", 9, 2, 550, 450, chapter9.MultiJointModelSegment.panel),
-    ExerciseDescriptor("RotateObject", 10, 0, 450, 450, chapter10.RotateObject.panel)
-//      ExerciseDescriptor("PickObject", 10, 1, 450, 450, chapter10.PickObject.panel),
-//      ExerciseDescriptor("PickFace", 10, 2, 450, 450, chapter10.PickFace.panel),
-//      ExerciseDescriptor("Hud", 10, 3, 450, 450, chapter10.Hud.panel),
-//      ExerciseDescriptor("ThreeDOverWeb", 10, 4, 450, 450, chapter10.ThreeDOverWeb.panel),
-//      ExerciseDescriptor("Fog", 10, 5, 450, 450, chapter10.Fog.panel),
-//      ExerciseDescriptor("FogW", 10, 6, 450, 450, chapter10.FogW.panel),
-//      ExerciseDescriptor("RoundedPoints", 10, 7, 450, 450, chapter10.RoundedPoints.panel),
-//      ExerciseDescriptor("LookAtBlendedTriangles", 10, 8, 450, 450, chapter10.LookAtBlendedTriangles.panel),
-//      ExerciseDescriptor("BlendedCube", 10, 9, 450, 450, chapter10.BlendedCube.panel),
+    ExerciseDescriptor("RotateObject", 10, 0, 450, 450, chapter10.RotateObject.panel),
+    ExerciseDescriptor("PickObject", 10, 1, 450, 450, chapter10.PickObject.panel),
+    ExerciseDescriptor("PickFace", 10, 2, 450, 450, chapter10.PickFace.panel),
+    ExerciseDescriptor("HUD", 10, 3, 450, 450, chapter10.Hud.panel),
+    ExerciseDescriptor("3DoverWeb", 10, 4, 450, 450, chapter10.ThreeDOverWeb.panel),
+    ExerciseDescriptor("Fog", 10, 5, 500, 450, chapter10.Fog.panel),
+    ExerciseDescriptor("Fog_w", 10, 6, 450, 450, chapter10.FogW.panel),
+    ExerciseDescriptor("RoundedPoints", 10, 7, 450, 450, chapter10.RoundedPoints.panel),
+    ExerciseDescriptor("LookAtBlendedTriangles", 10, 8, 450, 450, chapter10.LookAtBlendedTriangles.panel),
+    ExerciseDescriptor("BlendedCube", 10, 9, 450, 450, chapter10.BlendedCube.panel)
   )
 
   @main
@@ -133,7 +135,7 @@ object LaminarApp:
   ) =
     val chapterTitle = span(s"Chapter $chapter")
     val exerciseLis  = exercises.toList.map(buildExerciseListItem(exercisePanel, answerKeyPanel))
-    li(cls := "parent", chapterTitle, ul(cls := "child", exerciseLis))
+    li(cls := "parent", zIndex := MaxZindex - chapter, chapterTitle, ul(cls := "child", exerciseLis))
 
   private def buildExerciseListItem(
       exercisePanel: dom.Element,

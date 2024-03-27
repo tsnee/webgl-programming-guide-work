@@ -69,7 +69,7 @@ void main() {
       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
     ))
     VertexBufferObject.initializeVbo(gl, colors)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, 0, 0)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Color", 3, 0, 0)
     val indices     = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
       4, 5, 6, 4, 6, 7,       // right

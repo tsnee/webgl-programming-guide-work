@@ -1,10 +1,6 @@
-package io.github.tsnee.webgl.common
+package io.github.tsnee.webgl.chapter5
 
-import org.scalajs.dom.Image
-import org.scalajs.dom.UIEvent
-import org.scalajs.dom.WebGLRenderingContext
-import org.scalajs.dom.WebGLTexture
-import org.scalajs.dom.WebGLUniformLocation
+import org.scalajs.dom._
 
 import scala.scalajs.js
 

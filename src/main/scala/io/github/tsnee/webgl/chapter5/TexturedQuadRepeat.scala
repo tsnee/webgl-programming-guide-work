@@ -5,7 +5,6 @@ import io.github.iltotore.iron._
 import io.github.iltotore.iron.constraint.all._
 import io.github.tsnee.webgl._
 import io.github.tsnee.webgl.common.ExercisePanelBuilder
-import io.github.tsnee.webgl.common.TextureLoader
 import io.github.tsnee.webgl.common.VertexBufferObject
 import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.types._
@@ -56,8 +55,16 @@ void main() {
       0.5, -0.5, 1.7, -0.2
     ))
     VertexBufferObject.initializeVbo(gl, verticesTexCoords)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 2, floatSize * 4, 0)
-    WebglAttribute.enableFloatAttribute(gl, program, "a_TexCoord", 2, floatSize * 4, floatSize * 2)
+    WebglAttribute.enableAttribute(gl, program, WebGLRenderingContext.FLOAT, "a_Position", 2, floatSize * 4, 0)
+    WebglAttribute.enableAttribute(
+      gl,
+      program,
+      WebGLRenderingContext.FLOAT,
+      "a_TexCoord",
+      2,
+      floatSize * 4,
+      floatSize * 2
+    )
     gl.clearColor(0, 0, 0, 1)
     gl.useProgram(program)
     val uSampler          = gl.getUniformLocation(program, "u_Sampler")
