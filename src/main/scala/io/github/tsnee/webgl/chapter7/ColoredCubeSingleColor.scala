@@ -1,25 +1,20 @@
 package io.github.tsnee.webgl.chapter7
 
-import com.raquo.laminar.api.L.{Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.{Element => _, _}
 
+import scala.annotation.unused
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.Float32Array
-import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.typedarray._
 
-object ColoredCubeSingleColor extends Exercise:
-  override val label: String = "ColoredCube_singleColor"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  val vertexShaderSource: String =
+object ColoredCubeSingleColor:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -31,7 +26,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 varying vec4 v_Color;
@@ -40,15 +35,11 @@ void main() {
 }
 """
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      @unused canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
@@ -60,24 +51,25 @@ void main() {
     //  | |v7---|-|v4
     //  |/      |/
     //  v2------v3
-    val vertices    = Float32Array(js.Array(
-      1f, 1f, 1f, -1f, 1f, 1f, -1f, -1f, 1f, 1f, -1f, 1f,
-      1f, 1f, 1f, 1f, -1f, 1f, 1f, -1f, -1f, 1f, 1f, -1f,
-      1f, 1f, 1f, 1f, 1f, -1f, -1f, 1f, -1f, -1f, 1f, 1f,
-      -1f, 1f, 1f, -1f, 1f, -1f, -1f, -1f, -1f, -1f, -1f, 1f,
-      -1f, -1f, -1f, 1f, -1f, -1f, 1f, -1f, 1f, -1f, -1f, 1f,
-      1f, -1f, -1f, -1f, -1f, -1f, -1f, 1f, -1f, 1f, 1f, -1f
+    val vertices    = Float32Array(js.Array[Float](
+      1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
+      1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
+      1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1,
+      -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1,
+      -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
+      1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
     ))
     initializeVbo(gl, program, vertices, 3, WebGLRenderingContext.FLOAT, "a_Position")
-    val colors      = Float32Array(js.Array(
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
+    val colors      = Float32Array(js.Array[Float](
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
     ))
-    initializeVbo(gl, program, colors, 3, WebGLRenderingContext.FLOAT, "a_Color")
+    VertexBufferObject.initializeVbo(gl, colors)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, 0, 0)
     val indices     = Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
       4, 5, 6, 4, 6, 7,       // right

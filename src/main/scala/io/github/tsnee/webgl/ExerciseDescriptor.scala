@@ -11,8 +11,8 @@ final case class ExerciseDescriptor(
     label: String,
     chapter: Chapter,
     position: Int,
-    height: Height,
-    width: Width,
+    answerKeyHeight: Height,
+    answerKeyWidth: Width,
     panel: (Height, Width) => Element
 )
 

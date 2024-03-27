@@ -1,28 +1,20 @@
 package io.github.tsnee.webgl.chapter9
 
 import cats.syntax.all._
-import com.raquo.laminar.api.L.{Element => _, Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.{Element => _, _}
 
 import scala.scalajs.js
-import scala.scalajs.js.typedarray.Float32Array
-import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.typedarray._
 
-object MultiJointModel extends Exercise:
-  override val label: String = "MultiJointModel"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  override def height: Int = 550
-
-  val vertexShaderSource: String =
+object MultiJointModel:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Normal;
@@ -39,7 +31,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 varying vec4 v_Color;
@@ -49,37 +41,29 @@ void main() {
 """
 
   private val angleStepDegrees   = 3f
-  private val gAngles            = Array.ofDim[Float](5)
-  private val arm1AngleDegrees   = 0 // index into gAngles
-  private val joint1AngleDegrees = 1 // index into gAngles
-  private val joint2AngleDegrees = 2 // index into gAngles
-  private val joint3AngleDegrees = 3 // index into gAngles
+  private val arm1AngleDegrees   = Var[Float](90)
+  private val joint1AngleDegrees = Var[Float](45)
+  private val joint2AngleDegrees = Var[Float](0)
+  private val joint3AngleDegrees = Var[Float](0)
 
-  def initialize(canvas: Canvas): Unit =
-    Array[Float](90, 45, 0, 0).copyToArray(gAngles)
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run(canvas, _, _)
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
-      canvas: HTMLCanvasElement,
+  private def useWebgl(
+      canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
-    gl.clearColor(0f, 0f, 0f, 1f)
+    gl.clearColor(0, 0, 0, 1)
     gl.enable(WebGLRenderingContext.DEPTH_TEST)
     gl.useProgram(program)
     val uMvpMatrix    = gl.getUniformLocation(program, "u_MvpMatrix")
     val uNormalMatrix = gl.getUniformLocation(program, "u_NormalMatrix")
-    val projMatrix    = Matrix4.setPerspective(50f, gl.drawingBufferWidth.toFloat / gl.drawingBufferHeight, 1, 100)
+    val projMatrix    = Matrix4.setPerspective(50, gl.drawingBufferWidth.toFloat / gl.drawingBufferHeight, 1, 100)
     val viewMatrix    =
-      Matrix4.setLookAt(eyeX = 20f, eyeY = 10f, eyeZ = 30f, atX = 0f, atY = 0f, atZ = 0f, upX = 0f, upY = 1f, upZ = 0f)
+      Matrix4.setLookAt(eyeX = 20, eyeY = 10, eyeZ = 30, atX = 0, atY = 0, atZ = 0, upX = 0, upY = 1, upZ = 0)
     val n             = initVertexBuffers(gl, program)
-    canvas.setAttribute("tabindex", "0") // required for canvas to be able to receive focus & therefore KeyboardEvents
-    canvas.addEventListener("keydown", keyDown(gl, n, projMatrix * viewMatrix, uMvpMatrix, uNormalMatrix)(_))
+    canvas.amend(tabIndex := 0, onKeyDown --> keyDown(gl, n, projMatrix * viewMatrix, uMvpMatrix, uNormalMatrix))
     draw(gl, n, projMatrix * viewMatrix, uMvpMatrix, uNormalMatrix)
 
   private def keyDown(
@@ -94,28 +78,28 @@ void main() {
     ev.preventDefault()
     val joint1AngleDelta =
       ev.key match
-        case KeyValue.ArrowDown if gAngles(joint1AngleDegrees) < 135f => +angleStepDegrees
-        case KeyValue.ArrowUp if gAngles(joint1AngleDegrees) > -135f  => -angleStepDegrees
-        case _                                                        => 0f
-    gAngles(joint1AngleDegrees) += joint1AngleDelta
+        case KeyValue.ArrowDown if joint1AngleDegrees.now() < 135f => +angleStepDegrees
+        case KeyValue.ArrowUp if joint1AngleDegrees.now() > -135f  => -angleStepDegrees
+        case _                                                     => 0f
+    joint1AngleDegrees.update(_ + joint1AngleDelta)
     val arm1AngleDelta   =
       ev.key match
         case KeyValue.ArrowRight => +angleStepDegrees
         case KeyValue.ArrowLeft  => -angleStepDegrees
         case _                   => 0f
-    gAngles(arm1AngleDegrees) += arm1AngleDelta
+    arm1AngleDegrees.update(_ + arm1AngleDelta)
     val joint2AngleDelta =
       ev.key match
         case "z" => +angleStepDegrees
         case "x" => -angleStepDegrees
         case _   => 0f
-    gAngles(joint2AngleDegrees) += joint2AngleDelta
+    joint2AngleDegrees.update(_ + joint2AngleDelta)
     val joint3AngleDelta =
       ev.key match
-        case "v" if gAngles(joint3AngleDegrees) < 60  => +angleStepDegrees
-        case "c" if gAngles(joint3AngleDegrees) > -60 => -angleStepDegrees
-        case _                                        => 0f
-    gAngles(joint3AngleDegrees) += joint3AngleDelta
+        case "v" if joint3AngleDegrees.now() < 60  => +angleStepDegrees
+        case "c" if joint3AngleDegrees.now() > -60 => -angleStepDegrees
+        case _                                     => 0f
+    joint3AngleDegrees.update(_ + joint3AngleDelta)
     if (arm1AngleDelta =!= 0f || joint1AngleDelta =!= 0f || joint2AngleDelta =!= 0f || joint3AngleDelta =!= 0f)
       draw(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix)
 
@@ -130,17 +114,19 @@ void main() {
       -0.5, 0.0, -0.5, 0.5, 0.0, -0.5, 0.5, 0.0, 0.5, -0.5, 0.0, 0.5,   // v7-v4-v3-v2 down
       0.5, 0.0, -0.5, -0.5, 0.0, -0.5, -0.5, 1.0, -0.5, 0.5, 1.0, -0.5  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, vertices, 3, WebGLRenderingContext.FLOAT, "a_Position")
+    VertexBufferObject.initializeVbo(gl, vertices)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 3, 0, 0)
     // Normal
-    val normals     = new Float32Array(js.Array(
-      0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,     // v0-v1-v2-v3 front
-      1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,     // v0-v3-v4-v5 right
-      0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,     // v0-v5-v6-v1 up
-      -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // v1-v6-v7-v2 left
-      0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, // v7-v4-v3-v2 down
-      0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f  // v4-v7-v6-v5 back
+    val normals     = new Float32Array(js.Array[Float](
+      0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,     // v0-v1-v2-v3 front
+      1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,     // v0-v3-v4-v5 right
+      0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,     // v0-v5-v6-v1 up
+      -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, // v1-v6-v7-v2 left
+      0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, // v7-v4-v3-v2 down
+      0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0  // v4-v7-v6-v5 back
     ))
-    initializeVbo(gl, program, normals, 3, WebGLRenderingContext.FLOAT, "a_Normal")
+    VertexBufferObject.initializeVbo(gl, normals)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Normal", 3, 0, 0)
     // Indices of the vertices
     val indices     = new Uint8Array(js.Array[Short](
       0, 1, 2, 0, 2, 3,       // front
@@ -171,23 +157,23 @@ void main() {
     val arm1Length            = 10f
     val arm1ModelMatrix       = baseModelMatrix
       .translate(0f, baseHeight, 0f)
-      .rotate(gAngles(arm1AngleDegrees), 0f, 1f, 0f)
+      .rotate(arm1AngleDegrees.now(), 0f, 1f, 0f)
     drawBox(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix, arm1ModelMatrix, (3, arm1Length, 3))
     // Arm2
     val arm2Length            = 10f
     val arm2ModelMatrix       = arm1ModelMatrix // this is what makes arm1 higher in the hierarchy than arm2
       .translate(0f, arm1Length, 0f)
-      .rotate(gAngles(joint1AngleDegrees), 0f, 0f, 1f)
+      .rotate(joint1AngleDegrees.now(), 0f, 0f, 1f)
     drawBox(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix, arm2ModelMatrix, (4, arm2Length, 4))
     // Palm
     val palmLength            = 2f
-    val palmModelMatrix       = arm2ModelMatrix.translate(0f, arm2Length, 0f).rotate(gAngles(joint2AngleDegrees), 0, 1, 0)
+    val palmModelMatrix       = arm2ModelMatrix.translate(0f, arm2Length, 0f).rotate(joint2AngleDegrees.now(), 0, 1, 0)
     drawBox(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix, palmModelMatrix, (2, palmLength, 6))
     val baseFingerModelMatrix = palmModelMatrix.translate(0, palmLength, 0)
 
-    val finger1ModelMatrix = baseFingerModelMatrix.translate(0, 0, 2).rotate(gAngles(joint3AngleDegrees), 1, 0, 0)
+    val finger1ModelMatrix = baseFingerModelMatrix.translate(0, 0, 2).rotate(joint3AngleDegrees.now(), 1, 0, 0)
     drawBox(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix, finger1ModelMatrix, (1, 2, 1))
-    val finger2ModelMatrix = baseFingerModelMatrix.translate(0, 0, -2).rotate(-gAngles(joint3AngleDegrees), 1, 0, 0)
+    val finger2ModelMatrix = baseFingerModelMatrix.translate(0, 0, -2).rotate(-joint3AngleDegrees.now(), 1, 0, 0)
     drawBox(gl, n, viewProjMatrix, uMvpMatrix, uNormalMatrix, finger2ModelMatrix, (1, 2, 1))
 
   private def drawBox(
@@ -210,25 +196,3 @@ void main() {
       `type` = WebGLRenderingContext.UNSIGNED_BYTE,
       offset = 0
     )
-
-  private def initializeVbo(
-      gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      array: Float32Array,
-      size: Int,
-      typ: Int,
-      attributeName: String
-  ): Unit =
-    val vertexBufferObject = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBufferObject)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-    val attribute          = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = typ,
-      normalized = false,
-      stride = 0,
-      offset = 0
-    )
-    gl.enableVertexAttribArray(attribute)

@@ -71,8 +71,7 @@ void main() {
     image1.addEventListener("load", loadTexture(gl, verticesTexCoords.size / 4, texture1, uSampler1, image1, 1))
     image1.src = "circle.gif"
 
-  // FIXME
-  private val loadMask = scala.collection.mutable.BitSet()
+  private val imageLoadCounter = Var[Int](0)
 
   private def loadTexture(
       gl: WebGLRenderingContext,
@@ -92,8 +91,9 @@ void main() {
       gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
       gl.texImage2D(TEXTURE_2D, 0, RGB, RGB, UNSIGNED_BYTE, image)
       gl.uniform1i(sampler, texUnit)
-      loadMask.add(texUnit)
-      if loadMask.subsetOf(Set(0, 1)) then
+      imageLoadCounter.update(_ + 1)
+      // wait until both images have been loaded before drawing
+      if imageLoadCounter.now() > 1 then
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
         gl.drawArrays(
           mode = WebGLRenderingContext.TRIANGLE_STRIP,

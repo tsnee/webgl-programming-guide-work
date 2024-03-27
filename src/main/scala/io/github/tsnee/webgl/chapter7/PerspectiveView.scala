@@ -1,24 +1,19 @@
 package io.github.tsnee.webgl.chapter7
 
-import com.raquo.laminar.api.L.{Image => _, _}
-import io.github.tsnee.webgl.Exercise
-import io.github.tsnee.webgl.WebglInitializer
+import com.raquo.laminar.api.L._
+import io.github.iltotore.iron._
+import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.VertexBufferObject
+import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
-import org.scalajs.dom._
-import org.scalajs.dom.html.Canvas
+import io.github.tsnee.webgl.types._
+import org.scalajs.dom.{Element => _, _}
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-object PerspectiveView extends Exercise:
-  override val label: String = "PerspectiveView"
-
-  lazy val panel: com.raquo.laminar.api.L.Element =
-    val canvas = canvasTag(widthAttr := 400, heightAttr := 400)
-    initialize(canvas.ref)
-    div(canvas)
-
-  val vertexShaderSource: String =
+object PerspectiveView:
+  val vertexShaderSource: VertexShaderSource =
     """
 attribute vec4 a_Position;
 attribute vec4 a_Color;
@@ -31,7 +26,7 @@ void main() {
 }
 """
 
-  val fragmentShaderSource: String =
+  val fragmentShaderSource: FragmentShaderSource =
     """
 precision mediump float;
 varying vec4 v_Color;
@@ -40,19 +35,21 @@ void main() {
 }
 """
 
-  private val gViewMatrixValues                                = Array(0f, 0f, 5f, 0f, 0f, -100f, 0f, 1f, 0f)
-  // indices into gViewMatrixValues
-  private val (eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ) = (0, 1, 2, 3, 4, 5, 6, 7, 8)
+  private val viewEyeX = Var[Float](0)
+  private val viewEyeY = Var[Float](0)
+  private val viewEyeZ = 5f
+  private val viewAtX  = 0f
+  private val viewAtY  = 0f
+  private val viewAtZ  = -100f
+  private val viewUpX  = 0f
+  private val viewUpY  = 1f
+  private val viewUpZ  = 0f
 
-  def initialize(canvas: Canvas): Unit =
-    WebglInitializer.initialize(
-      canvas,
-      vertexShaderSource,
-      fragmentShaderSource,
-      run
-    )
+  def panel(height: Height, width: Width): Element =
+    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
-  private def run(
+  private def useWebgl(
+      canvas: Canvas,
       gl: WebGLRenderingContext,
       program: WebGLProgram
   ): Unit =
@@ -80,9 +77,9 @@ void main() {
       -1.25f, -1.0f, 0.0f, 0.4f, 0.4f, 1.0f,
       -0.25f, -1.0f, 0.0f, 1.0f, 0.4f, 0.4f
     ))
-    initializeVbo(gl, verticesColors)
-    enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 6, 0)
-    enableFloatAttribute(gl, program, "a_Color", 3, floatSize * 6, floatSize * 3)
+    VertexBufferObject.initializeVbo(gl, verticesColors)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Position", 3, floatSize * 6, 0)
+    WebglAttribute.enableFloatAttribute(gl, program, "a_Color", 3, floatSize * 6, floatSize * 3)
     gl.clearColor(0f, 0f, 0f, 1f)
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
     gl.useProgram(program)
@@ -91,15 +88,15 @@ void main() {
       location = uViewMatrix,
       transpose = false,
       value = Matrix4.setLookAt(
-        eyeX = gViewMatrixValues(eyeX),
-        eyeY = gViewMatrixValues(eyeY),
-        eyeZ = gViewMatrixValues(eyeZ),
-        atX = gViewMatrixValues(atX),
-        atY = gViewMatrixValues(atY),
-        atZ = gViewMatrixValues(atZ),
-        upX = gViewMatrixValues(upX),
-        upY = gViewMatrixValues(upY),
-        upZ = gViewMatrixValues(upZ)
+        eyeX = viewEyeX.now(),
+        eyeY = viewEyeY.now(),
+        eyeZ = viewEyeZ,
+        atX = viewAtX,
+        atY = viewAtY,
+        atZ = viewAtZ,
+        upX = viewUpX,
+        upY = viewUpY,
+        upZ = viewUpZ
       ).toFloat32Array
     )
     val uProjMatrix    = gl.getUniformLocation(program, "u_ProjMatrix")
@@ -109,7 +106,7 @@ void main() {
       value = Matrix4.setPerspective(30f, gl.drawingBufferWidth.toFloat / gl.drawingBufferHeight, 1, 100).toFloat32Array
     )
     val numVertices    = verticesColors.size / 6
-    document.addEventListener("keydown", keyDown(gl, numVertices, uViewMatrix)(_))
+    canvas.amend(onKeyDown --> keyDown(gl, numVertices, uViewMatrix))
     gl.drawArrays(
       mode = WebGLRenderingContext.TRIANGLES,
       first = 0,
@@ -123,23 +120,23 @@ void main() {
   )(evt: KeyboardEvent): Unit =
     evt.preventDefault()
     evt.key match
-      case KeyValue.ArrowLeft | "h"  => gViewMatrixValues(eyeX) -= 0.01f
-      case KeyValue.ArrowRight | "l" => gViewMatrixValues(eyeX) += 0.01f
-      case KeyValue.ArrowDown | "j"  => gViewMatrixValues(eyeY) -= 0.01f
-      case KeyValue.ArrowUp | "k"    => gViewMatrixValues(eyeY) += 0.01f
+      case KeyValue.ArrowLeft | "h"  => viewEyeX.update(_ - 0.01f)
+      case KeyValue.ArrowRight | "l" => viewEyeX.update(_ + 0.01f)
+      case KeyValue.ArrowDown | "j"  => viewEyeY.update(_ - 0.01f)
+      case KeyValue.ArrowUp | "k"    => viewEyeY.update(_ + 0.01f)
     gl.uniformMatrix4fv(
       location = uViewMatrix,
       transpose = false,
       value = Matrix4.setLookAt(
-        eyeX = gViewMatrixValues(eyeX),
-        eyeY = gViewMatrixValues(eyeY),
-        eyeZ = gViewMatrixValues(eyeZ),
-        atX = gViewMatrixValues(atX),
-        atY = gViewMatrixValues(atY),
-        atZ = gViewMatrixValues(atZ),
-        upX = gViewMatrixValues(upX),
-        upY = gViewMatrixValues(upY),
-        upZ = gViewMatrixValues(upZ)
+        eyeX = viewEyeX.now(),
+        eyeY = viewEyeY.now(),
+        eyeZ = viewEyeZ,
+        atX = viewAtX,
+        atY = viewAtY,
+        atZ = viewAtZ,
+        upX = viewUpX,
+        upY = viewUpY,
+        upZ = viewUpZ
       ).toFloat32Array
     )
     gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT)
@@ -148,27 +145,3 @@ void main() {
       first = 0,
       count = numVertices
     )
-
-  private def initializeVbo(gl: WebGLRenderingContext, array: Float32Array): Unit =
-    val vertexTexCoordsBuffer = gl.createBuffer()
-    gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexTexCoordsBuffer)
-    gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, array, WebGLRenderingContext.STATIC_DRAW)
-
-  private def enableFloatAttribute(
-      gl: WebGLRenderingContext,
-      program: WebGLProgram,
-      attributeName: String,
-      size: Int,
-      stride: Int,
-      offset: Int
-  ): Unit =
-    val attribute = gl.getAttribLocation(program, attributeName)
-    gl.vertexAttribPointer(
-      indx = attribute,
-      size = size,
-      `type` = WebGLRenderingContext.FLOAT,
-      normalized = false,
-      stride = stride,
-      offset = offset
-    )
-    gl.enableVertexAttribArray(attribute)
