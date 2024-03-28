@@ -2,6 +2,7 @@ package io.github.tsnee.webgl
 
 import cats._
 import cats.syntax.all._
+import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
 import io.github.iltotore.iron._
 import io.github.iltotore.iron.cats.given
@@ -11,9 +12,9 @@ final case class ExerciseDescriptor(
     label: String,
     chapter: Chapter,
     position: Int,
-    answerKeyHeight: Height,
     answerKeyWidth: Width,
-    panel: (Height, Width) => Element
+    answerKeyHeight: Height,
+    panel: (Width, Height) => L.Element
 )
 
 object ExerciseDescriptor:

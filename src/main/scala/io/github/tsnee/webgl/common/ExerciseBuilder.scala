@@ -13,8 +13,8 @@ object ExerciseBuilder:
       fragmentShaderSource: FragmentShaderSource,
       useWebgl: (Canvas, WebGLRenderingContext, WebGLProgram) => Unit
   ): PanelBuilder =
-    (height: Height, width: Width) =>
-      val webglCanvas      = canvasTag(heightAttr := height, widthAttr := width)
+    (canvasWidth: Width, canvasHeight: Height) =>
+      val webglCanvas      = canvasTag(widthAttr := canvasWidth, heightAttr := canvasHeight)
       val successOrFailure =
         for
           gl <- ContextExtractor.extractWebglContext(webglCanvas.ref)

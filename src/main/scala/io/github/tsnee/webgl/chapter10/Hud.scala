@@ -43,7 +43,7 @@ void main() {
 """
   private val currentAngle                       = Var[Float](0)
 
-  def panel(canvasHeight: Height, canvasWidth: Width): Element =
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
     val canvasWebgl      = canvasTag(
       heightAttr := canvasHeight,
       widthAttr  := canvasWidth,
@@ -69,7 +69,7 @@ void main() {
         ctx <- ContextExtractor.extract2dContext(canvasHud.ref)
       yield useWebglAnd2d(gl, pg, canvasHud, ctx)
     successOrFailure match
-      case Right(())   => div(position := "relative", height := "100%", width := "100%", canvasWebgl, canvasHud)
+      case Right(())   => div(position := "relative", width := "100%", height := "100%", canvasWebgl, canvasHud)
       case Left(error) => div(error)
 
   private def useWebglAnd2d(

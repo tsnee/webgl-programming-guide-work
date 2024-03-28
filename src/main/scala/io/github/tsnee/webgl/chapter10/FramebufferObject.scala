@@ -6,34 +6,26 @@ import io.github.iltotore.iron._
 import io.github.tsnee.webgl.common._
 import io.github.tsnee.webgl.math.Matrix4
 import io.github.tsnee.webgl.types._
-import org.scalajs.dom.Event
-import org.scalajs.dom.Image
-import org.scalajs.dom.WebGLBuffer
-import org.scalajs.dom.WebGLFramebuffer
-import org.scalajs.dom.WebGLProgram
-import org.scalajs.dom.WebGLRenderingContext
-import org.scalajs.dom.WebGLTexture
-import org.scalajs.dom.WebGLUniformLocation
-import org.scalajs.dom.console
-import org.scalajs.dom.window
+import org.scalajs.dom.{Element => _, _}
 
 import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.typedarray._
 
 final case class ArrayBufferWrapper(buffer: WebGLBuffer, size: Int, typ: Int)
-final case class ShapeBuffers(
-    vertexBufferWrapper: ArrayBufferWrapper,
-    texCoordsBufferWrapper: ArrayBufferWrapper,
-    indices: WebGLBuffer,
-    numIndices: Int
-)
 final case class FramebufferWrapper(
     framebuffer: WebGLFramebuffer,
     texture: WebGLTexture
 )
 
 object FramebufferObject:
+  final case class ShapeBuffers(
+      vertexBufferWrapper: ArrayBufferWrapper,
+      texCoordsBufferWrapper: ArrayBufferWrapper,
+      indices: WebGLBuffer,
+      numIndices: Int
+  )
+
   private val vertexShaderSource: VertexShaderSource = """
 attribute vec4 a_Position;
 attribute vec2 a_TexCoord;
@@ -59,8 +51,8 @@ void main() {
   private val OffscreenWidth: Int  = 256
   private val OffscreenHeight: Int = 256
 
-  def panel(canvasHeight: Height, canvasWidth: Width): Element =
-    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(canvasHeight, canvasWidth)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(canvasWidth, canvasHeight)
 
   private def useWebgl(
       canvas: Canvas,

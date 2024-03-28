@@ -5,4 +5,4 @@ import io.github.tsnee.webgl.types.Height
 import io.github.tsnee.webgl.types.Width
 
 trait PanelBuilder:
-  def apply(height: Height, width: Width): Element
+  def apply(width: Width, height: Height): Element

@@ -106,8 +106,8 @@ void main() {
     0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1  // v4-v7-v6-v5 back
   ))
 
-  def panel(canvasHeight: Height, canvasWidth: Width): Element =
-    val webglCanvas      = canvasTag(heightAttr := canvasHeight, widthAttr := canvasWidth)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    val webglCanvas      = canvasTag(widthAttr := canvasWidth, heightAttr := canvasHeight)
     val successOrFailure =
       for
         gl             <- ContextExtractor.extractWebglContext(webglCanvas.ref)

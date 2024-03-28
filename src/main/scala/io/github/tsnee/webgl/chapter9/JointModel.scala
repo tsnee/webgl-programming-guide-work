@@ -43,8 +43,11 @@ void main() {
   private val arm1AngleDegrees   = Var[Float](-90)
   private val joint1AngleDegrees = Var[Float](0)
 
-  def panel(height: Height, width: Width): Element =
-    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(
+      canvasWidth: Width,
+      canvasHeight: Height
+    )
 
   private def useWebgl(
       canvas: Canvas,

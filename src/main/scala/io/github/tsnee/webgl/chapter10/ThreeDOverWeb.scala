@@ -37,7 +37,7 @@ void main() {
 }
 """
 
-  def panel(canvasHeight: Height, canvasWidth: Width): Element =
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
     val canvas           = canvasTag(
       heightAttr := canvasHeight,
       widthAttr  := canvasWidth,
@@ -60,7 +60,7 @@ void main() {
         pg <- ProgramCreator.createProgram(gl, vertexShaderSource, fragmentShaderSource)
       yield useWebgl(gl, pg)
     successOrFailure match
-      case Right(())   => div(position := "relative", height := "100%", width := "100%", canvas, web)
+      case Right(())   => div(position := "relative", width := "100%", height := "100%", canvas, web)
       case Left(error) => div(error)
 
   private def useWebgl(

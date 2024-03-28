@@ -10,8 +10,8 @@ import org.scalajs.dom.WebGLRenderingContext
 import scala.scalajs.js
 
 object HelloCanvas:
-  def panel(height: Height, width: Width): Element =
-    val canvas = canvasTag(heightAttr := height, widthAttr := width)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    val canvas = canvasTag(widthAttr := canvasWidth, heightAttr := canvasHeight)
     extractContext(canvas.ref) match
       case Right(gl)   =>
         useWebgl(gl)

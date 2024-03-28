@@ -49,7 +49,7 @@ void main() {
   private val orthoProjectionFar  = Var[Float](0.5)
   private val nearFarText         = Var[String](f"near: ${orthoProjectionNear.now()}%.2f, far: ${orthoProjectionFar.now()}%.2f")
 
-  def panel(canvasHeight: Height, canvasWidth: Width): Element =
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
     val component = ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(
       canvasHeight,
       canvasWidth

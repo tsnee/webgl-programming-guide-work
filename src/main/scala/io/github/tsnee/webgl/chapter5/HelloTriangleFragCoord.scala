@@ -34,8 +34,11 @@ void main() {
 }
 """
 
-  def panel(height: Height, width: Width): Element =
-    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(
+      canvasWidth: Width,
+      canvasHeight: Height
+    )
 
   private def useWebgl(
       @unused canvas: Canvas,

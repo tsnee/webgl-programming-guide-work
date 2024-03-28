@@ -11,8 +11,8 @@ import org.scalajs.dom.WebGLProgram
 import org.scalajs.dom.WebGLRenderingContext
 
 object HelloPoint1:
-  def panel(height: Height, width: Width): Element =
-    val canvas           = canvasTag(heightAttr := height, widthAttr := width)
+  def panel(canvasWidth: Width, canvasHeight: Height): Element =
+    val canvas           = canvasTag(widthAttr := canvasWidth, heightAttr := canvasHeight)
     val successOrFailure =
       for
         gl <- ContextExtractor.extractWebglContext(canvas.ref)

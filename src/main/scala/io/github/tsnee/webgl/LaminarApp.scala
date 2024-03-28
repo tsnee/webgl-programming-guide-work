@@ -100,7 +100,9 @@ object LaminarApp:
     ExerciseDescriptor("LookAtBlendedTriangles", 10, 8, 450, 450, chapter10.LookAtBlendedTriangles.panel),
     ExerciseDescriptor("BlendedCube", 10, 9, 450, 450, chapter10.BlendedCube.panel),
     ExerciseDescriptor("ProgramObject", 10, 10, 450, 450, chapter10.ProgramObject.panel),
-    ExerciseDescriptor("FramebufferObject", 10, 11, 450, 450, chapter10.FramebufferObject.panel)
+    ExerciseDescriptor("FramebufferObject", 10, 11, 450, 450, chapter10.FramebufferObject.panel),
+    ExerciseDescriptor("Shadow", 10, 12, 450, 450, chapter10.Shadow.panel),
+    ExerciseDescriptor("Shadow_highp", 10, 13, 450, 450, chapter10.ShadowHighP.panel)
   )
 
   @main
@@ -160,7 +162,7 @@ object LaminarApp:
   )(
       @unused evt: MouseEvent
   ): Unit =
-    val newExercisePanel  = desc.panel(CanvasHeight, CanvasWidth)
+    val newExercisePanel  = desc.panel(CanvasWidth, CanvasHeight)
     unmount(mountedExercise.now())
     val newExercise       = render(exerciseContainer, newExercisePanel)
     mountedExercise.set(Some(newExercise))
