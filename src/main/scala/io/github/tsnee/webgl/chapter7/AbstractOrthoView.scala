@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L._
 import io.github.iltotore.iron._
 import io.github.iltotore.iron.constraint.all._
 import io.github.tsnee.webgl._
-import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.ExerciseBuilder
 import io.github.tsnee.webgl.common.VertexBufferObject
 import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
@@ -50,7 +50,7 @@ void main() {
   private val nearFarText         = Var[String](f"near: ${orthoProjectionNear.now()}%.2f, far: ${orthoProjectionFar.now()}%.2f")
 
   def panel(canvasHeight: Height, canvasWidth: Width): Element =
-    val component = ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(
+    val component = ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(
       canvasHeight,
       canvasWidth
     )

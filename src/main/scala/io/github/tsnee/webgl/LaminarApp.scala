@@ -98,7 +98,9 @@ object LaminarApp:
     ExerciseDescriptor("Fog_w", 10, 6, 450, 450, chapter10.FogW.panel),
     ExerciseDescriptor("RoundedPoints", 10, 7, 450, 450, chapter10.RoundedPoints.panel),
     ExerciseDescriptor("LookAtBlendedTriangles", 10, 8, 450, 450, chapter10.LookAtBlendedTriangles.panel),
-    ExerciseDescriptor("BlendedCube", 10, 9, 450, 450, chapter10.BlendedCube.panel)
+    ExerciseDescriptor("BlendedCube", 10, 9, 450, 450, chapter10.BlendedCube.panel),
+    ExerciseDescriptor("ProgramObject", 10, 10, 450, 450, chapter10.ProgramObject.panel),
+    ExerciseDescriptor("FramebufferObject", 10, 11, 450, 450, chapter10.FramebufferObject.panel)
   )
 
   @main

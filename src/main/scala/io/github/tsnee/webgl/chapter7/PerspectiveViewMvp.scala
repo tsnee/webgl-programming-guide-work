@@ -2,7 +2,7 @@ package io.github.tsnee.webgl.chapter7
 
 import com.raquo.laminar.api.L._
 import io.github.iltotore.iron._
-import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.ExerciseBuilder
 import io.github.tsnee.webgl.common.VertexBufferObject
 import io.github.tsnee.webgl.common.WebglAttribute
 import io.github.tsnee.webgl.math.Matrix4
@@ -48,7 +48,7 @@ void main() {
   private val viewUpZ  = 0f
 
   def panel(height: Height, width: Width): Element =
-    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
+    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
   private def useWebgl(
       @unused canvas: Canvas,

@@ -3,7 +3,7 @@ package io.github.tsnee.webgl.chapter2
 import com.raquo.laminar.api.L._
 import io.github.iltotore.iron._
 import io.github.iltotore.iron.constraint.all._
-import io.github.tsnee.webgl.common.ExercisePanelBuilder
+import io.github.tsnee.webgl.common.ExerciseBuilder
 import io.github.tsnee.webgl.types._
 import org.scalajs.dom.WebGLProgram
 import org.scalajs.dom.WebGLRenderingContext
@@ -26,7 +26,7 @@ void main() {
 """
 
   def panel(height: Height, width: Width): Element =
-    ExercisePanelBuilder.buildPanelBuilder(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
+    ExerciseBuilder.createWebglCanvas(vertexShaderSource, fragmentShaderSource, useWebgl)(height, width)
 
   private def useWebgl(
       @unused canvas: Canvas,
