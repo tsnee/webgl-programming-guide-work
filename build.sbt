@@ -23,12 +23,13 @@ lazy val webgl = project.in(file("."))
         )
     },
     libraryDependencies ++= List(
-      "org.typelevel"      %%% "cats-core"   % "2.10.0",
-      "io.github.iltotore" %%% "iron"        % "2.5.0",
-      "io.github.iltotore" %%% "iron-cats"   % "2.5.0",
-      "com.raquo"          %%% "laminar"     % "16.0.0",
-      "org.scala-js"       %%% "scalajs-dom" % "2.8.0",
-      "ai.dragonfly"       %%% "slash"       % "0.3.1",
-      "org.scalameta"      %%% "munit"       % "0.7.29" % Test
+      "org.typelevel"          %%% "cats-core"                % "2.10.0",
+      "io.github.iltotore"     %%% "iron"                     % "2.5.0",
+      "io.github.iltotore"     %%% "iron-cats"                % "2.5.0",
+      "com.raquo"              %%% "laminar"                  % "16.0.0",
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.3.0",
+      "org.scala-js"           %%% "scalajs-dom"              % "2.8.0",
+      "ai.dragonfly"           %%% "slash"                    % "0.3.1",
+      "org.scalameta"          %%% "munit"                    % "0.7.29" % Test
     )
   )
