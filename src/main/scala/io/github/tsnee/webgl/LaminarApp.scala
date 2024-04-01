@@ -103,7 +103,8 @@ object LaminarApp:
     ExerciseDescriptor("FramebufferObject", 10, 11, 450, 450, chapter10.FramebufferObject.panel),
     ExerciseDescriptor("Shadow", 10, 12, 450, 450, chapter10.Shadow.panel),
     ExerciseDescriptor("Shadow_highp", 10, 13, 450, 450, chapter10.ShadowHighP.panel),
-    ExerciseDescriptor("OBJViewer", 10, 14, 450, 450, chapter10.ObjViewer.panel)
+    ExerciseDescriptor("OBJViewer", 10, 14, 450, 450, chapter10.ObjViewer.panel),
+    ExerciseDescriptor("RotatingTriangle_contextLost", 10, 15, 450, 450, chapter10.RotatingTriangleContextLost.panel)
   )
 
   @main
